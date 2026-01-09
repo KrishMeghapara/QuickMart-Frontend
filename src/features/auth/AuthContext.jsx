@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { API_BASE } from '../../config/api';
 
 const AuthContext = createContext();
 
@@ -34,26 +35,26 @@ export const AuthProvider = ({ children }) => {
   // Token validation function
   const validateToken = useCallback(async (jwtToken) => {
     if (!jwtToken) return false;
-    
+
     try {
       // Check if token is expired (basic JWT parsing)
       const payload = JSON.parse(atob(jwtToken.split('.')[1]));
       const currentTime = Date.now() / 1000;
-      
+
       if (payload.exp && payload.exp < currentTime) {
         console.log('Token expired');
         return false;
       }
-      
+
       // Optionally validate with server
-      const response = await fetch('http://localhost:5236/api/User/ValidateToken', {
+      const response = await fetch(`${API_BASE}/User/ValidateToken`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${jwtToken}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       return response.ok;
     } catch (error) {
       console.error('Token validation error:', error);
@@ -66,7 +67,7 @@ export const AuthProvider = ({ children }) => {
     const initializeAuth = async () => {
       setLoading(true);
       setError(null);
-      
+
       try {
         if (token) {
           const isValid = await validateToken(token);
@@ -80,14 +81,14 @@ export const AuthProvider = ({ children }) => {
             // Token is valid, fetch user data if not already loaded
             if (!user) {
               try {
-                const response = await fetch('http://localhost:5236/api/User/Profile', {
+                const response = await fetch(`${API_BASE}/User/Profile`, {
                   method: 'GET',
                   headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                   }
                 });
-                
+
                 if (response.ok) {
                   const userData = await response.json();
                   const userInfo = {
@@ -145,7 +146,7 @@ export const AuthProvider = ({ children }) => {
       setError('Invalid token provided');
       return;
     }
-    
+
     try {
       const userInfo = {
         ...userData,
@@ -158,24 +159,24 @@ export const AuthProvider = ({ children }) => {
         googleName: userData.GoogleName || userData.UserName || '',
         googleEmail: userData.Email || ''
       };
-      
+
       setToken(jwtToken);
       setUser(userInfo);
       setError(null);
-      
+
       // Save user data to localStorage
       localStorage.setItem('userData', JSON.stringify(userInfo));
-      
+
       // Optional: Set up token refresh timer
       const payload = JSON.parse(atob(jwtToken.split('.')[1]));
       if (payload.exp) {
         const expirationTime = payload.exp * 1000; // Convert to milliseconds
         const currentTime = Date.now();
         const timeUntilExpiration = expirationTime - currentTime;
-        
+
         // Refresh token 5 minutes before expiration
         const refreshTime = Math.max(timeUntilExpiration - 5 * 60 * 1000, 0);
-        
+
         setTimeout(() => {
           console.log('Token will expire soon, consider refreshing');
           // Implement token refresh logic here
@@ -194,10 +195,10 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       localStorage.removeItem('jwtToken');
       localStorage.removeItem('userData');
-      
+
       // Optional: Notify server about logout
       if (token) {
-        fetch('http://localhost:5236/api/User/Logout', {
+        fetch(`${API_BASE}/User/Logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -218,7 +219,7 @@ export const AuthProvider = ({ children }) => {
       setError('Invalid user data provided');
       return;
     }
-    
+
     try {
       const updatedUser = {
         ...user,
@@ -235,16 +236,16 @@ export const AuthProvider = ({ children }) => {
 
   const refreshToken = useCallback(async () => {
     if (!token) return false;
-    
+
     try {
-      const response = await fetch('http://localhost:5236/api/User/RefreshToken', {
+      const response = await fetch(`${API_BASE}/User/RefreshToken`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         if (data.token || data.Token) {
@@ -252,7 +253,7 @@ export const AuthProvider = ({ children }) => {
           return true;
         }
       }
-      
+
       // If refresh fails, logout user
       logout();
       return false;
