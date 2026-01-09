@@ -199,8 +199,9 @@ const AddAddressForm = ({ onSuccess }) => {
     if (activeStep === 0) {
       // Validate required fields
       const requiredFields = ['house', 'street', 'city', 'state', 'pincode'];
+      const formData = { house, street, city, state, pincode };
       const hasErrors = requiredFields.some(field => {
-        const value = eval(field);
+        const value = formData[field];
         validateField(field, value);
         return !value.trim();
       });
