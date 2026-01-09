@@ -46,6 +46,7 @@ import { useCart } from '../features/cart/CartContext';
 import { useAuth } from '../features/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import apiService from '../services/apiService';
+import { API_BASE } from '../config/api';
 import './PaymentPage.css';
 
 const steps = ['Order Review', 'Shipping Details', 'Payment Method', 'Confirmation'];
@@ -85,7 +86,7 @@ export default function PaymentPage() {
   const { cart, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
-  
+
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -122,7 +123,7 @@ export default function PaymentPage() {
   const fetchUserAddress = async () => {
     try {
       setIsLoadingAddress(true);
-      const response = await fetch('http://localhost:5236/api/Address/GetForCurrentUser', {
+      const response = await fetch(`${API_BASE}/Address/GetForCurrentUser`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
           'Content-Type': 'application/json'
@@ -151,12 +152,12 @@ export default function PaymentPage() {
         console.error('Failed to fetch address:', response.status);
         setError('Failed to load your saved address. Please fill in details manually.');
       }
-          } catch (error) {
-        console.error('Error fetching user address:', error);
-        setError('Failed to load your saved address. Please fill in details manually.');
-      } finally {
-        setIsLoadingAddress(false);
-      }
+    } catch (error) {
+      console.error('Error fetching user address:', error);
+      setError('Failed to load your saved address. Please fill in details manually.');
+    } finally {
+      setIsLoadingAddress(false);
+    }
   };
 
   const handleNext = () => {
@@ -164,13 +165,13 @@ export default function PaymentPage() {
       // Validate shipping details
       const required = ['fullName', 'phone', 'address', 'city', 'state', 'pincode'];
       const missing = required.filter(field => !shippingDetails[field]);
-      
+
       if (missing.length > 0) {
         setError(`Please fill in: ${missing.join(', ')}`);
         return;
       }
     }
-    
+
     setError(null);
     setActiveStep((prevStep) => prevStep + 1);
   };
@@ -208,7 +209,7 @@ export default function PaymentPage() {
       setOrderId(order.orderID || order.OrderID);
       setSuccess(true);
       setActiveStep(3);
-      
+
       // Clear cart after successful order
       clearCart();
     } catch (error) {
@@ -227,14 +228,14 @@ export default function PaymentPage() {
         <CardContent>
           <List>
             {cart.map((item, index) => (
-              <ListItem key={index} sx={{ 
-                mb: 2, 
+              <ListItem key={index} sx={{
+                mb: 2,
                 bgcolor: '#f8fafc',
                 borderRadius: 2,
                 border: '1px solid #e5e7eb'
               }}>
                 <ListItemAvatar>
-                  <Avatar sx={{ 
+                  <Avatar sx={{
                     bgcolor: '#10b981',
                     color: 'white',
                     fontWeight: 700
@@ -260,7 +261,7 @@ export default function PaymentPage() {
               </ListItem>
             ))}
           </List>
-          
+
           <Divider sx={{ my: 2 }} />
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography>Subtotal:</Typography>
@@ -287,19 +288,19 @@ export default function PaymentPage() {
       <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: '#1f2937' }}>
         Shipping Information
       </Typography>
-      
-              {/* Guest/User Toggle */}
-        {!user && (
-          <Box sx={{ mb: 3, p: 2, backgroundColor: '#f0f9ff', borderRadius: 2, border: '1px solid #0ea5e9' }}>
-            <Typography variant="body2" sx={{ color: '#0c4a6e', fontWeight: 600 }}>
-              💡 Checkout as guest or create an account for faster future orders
-            </Typography>
-          </Box>
-        )}
-        
-        {/* Auto-fill Address Button */}
-        {user && !isGuestCheckout && (
-          <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+
+      {/* Guest/User Toggle */}
+      {!user && (
+        <Box sx={{ mb: 3, p: 2, backgroundColor: '#f0f9ff', borderRadius: 2, border: '1px solid #0ea5e9' }}>
+          <Typography variant="body2" sx={{ color: '#0c4a6e', fontWeight: 600 }}>
+            💡 Checkout as guest or create an account for faster future orders
+          </Typography>
+        </Box>
+      )}
+
+      {/* Auto-fill Address Button */}
+      {user && !isGuestCheckout && (
+        <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
           <Button
             variant="outlined"
             onClick={fetchUserAddress}
@@ -320,15 +321,15 @@ export default function PaymentPage() {
             Automatically fill shipping details from your saved address
           </Typography>
         </Box>
-        )}
-        
-        {/* Success Message */}
-        {addressFilled && (
-          <Alert severity="success" sx={{ mb: 3, borderRadius: 2 }}>
-            ✅ Address details auto-filled successfully! You can edit them if needed.
-          </Alert>
-        )}
-      
+      )}
+
+      {/* Success Message */}
+      {addressFilled && (
+        <Alert severity="success" sx={{ mb: 3, borderRadius: 2 }}>
+          ✅ Address details auto-filled successfully! You can edit them if needed.
+        </Alert>
+      )}
+
       <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
         <CardContent>
           <Grid container spacing={3}>
@@ -337,7 +338,7 @@ export default function PaymentPage() {
                 fullWidth
                 label="Full Name"
                 value={shippingDetails.fullName}
-                onChange={(e) => setShippingDetails({...shippingDetails, fullName: e.target.value})}
+                onChange={(e) => setShippingDetails({ ...shippingDetails, fullName: e.target.value })}
                 required
                 disabled={isLoadingAddress}
                 sx={{
@@ -354,7 +355,7 @@ export default function PaymentPage() {
                 fullWidth
                 label="Phone Number"
                 value={shippingDetails.phone}
-                onChange={(e) => setShippingDetails({...shippingDetails, phone: e.target.value})}
+                onChange={(e) => setShippingDetails({ ...shippingDetails, phone: e.target.value })}
                 required
                 disabled={isLoadingAddress}
                 sx={{
@@ -373,7 +374,7 @@ export default function PaymentPage() {
                 multiline
                 rows={3}
                 value={shippingDetails.address}
-                onChange={(e) => setShippingDetails({...shippingDetails, address: e.target.value})}
+                onChange={(e) => setShippingDetails({ ...shippingDetails, address: e.target.value })}
                 required
                 disabled={isLoadingAddress}
                 sx={{
@@ -390,7 +391,7 @@ export default function PaymentPage() {
                 fullWidth
                 label="City"
                 value={shippingDetails.city}
-                onChange={(e) => setShippingDetails({...shippingDetails, city: e.target.value})}
+                onChange={(e) => setShippingDetails({ ...shippingDetails, city: e.target.value })}
                 required
                 disabled={isLoadingAddress}
                 sx={{
@@ -407,7 +408,7 @@ export default function PaymentPage() {
                 fullWidth
                 label="State"
                 value={shippingDetails.state}
-                onChange={(e) => setShippingDetails({...shippingDetails, state: e.target.value})}
+                onChange={(e) => setShippingDetails({ ...shippingDetails, state: e.target.value })}
                 required
                 disabled={isLoadingAddress}
                 sx={{
@@ -424,7 +425,7 @@ export default function PaymentPage() {
                 fullWidth
                 label="Pincode"
                 value={shippingDetails.pincode}
-                onChange={(e) => setShippingDetails({...shippingDetails, pincode: e.target.value})}
+                onChange={(e) => setShippingDetails({ ...shippingDetails, pincode: e.target.value })}
                 required
                 disabled={isLoadingAddress}
                 sx={{
@@ -501,10 +502,10 @@ export default function PaymentPage() {
 
   const renderConfirmation = () => (
     <Box sx={{ textAlign: 'center', py: 4 }}>
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        mb: 3 
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        mb: 3
       }}>
         <Box sx={{
           width: 80,
@@ -519,19 +520,19 @@ export default function PaymentPage() {
           <CheckIcon sx={{ fontSize: 40, color: 'white' }} />
         </Box>
       </Box>
-      
+
       <Typography variant="h4" sx={{ mb: 2, fontWeight: 700, color: '#10b981' }}>
         Order Placed Successfully!
       </Typography>
-      
+
       <Typography variant="h6" sx={{ mb: 1, color: '#374151' }}>
         Order ID: #{orderId}
       </Typography>
-      
+
       <Typography variant="body1" sx={{ mb: 4, color: '#6b7280' }}>
         Thank you for your purchase. You'll receive an email confirmation shortly.
       </Typography>
-      
+
       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
         <Button
           variant="outlined"
@@ -577,8 +578,8 @@ export default function PaymentPage() {
   }
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh', 
+    <Box sx={{
+      minHeight: '100vh',
       bgcolor: '#f8fafc',
       py: 4
     }} className="payment-page">
@@ -609,7 +610,7 @@ export default function PaymentPage() {
 
         {/* Header */}
         <Box sx={{ mb: 4, textAlign: 'center' }}>
-          <Typography variant="h3" sx={{ 
+          <Typography variant="h3" sx={{
             fontWeight: 600,
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             backgroundClip: 'text',
@@ -625,9 +626,9 @@ export default function PaymentPage() {
         </Box>
 
         {/* Progress Stepper */}
-        <Paper sx={{ 
-          p: 3, 
-          mb: 4, 
+        <Paper sx={{
+          p: 3,
+          mb: 4,
           borderRadius: 3,
           background: 'linear-gradient(145deg, #ffffff, #f8fafc)',
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
@@ -666,8 +667,8 @@ export default function PaymentPage() {
         )}
 
         {/* Main Content */}
-        <Paper sx={{ 
-          p: 4, 
+        <Paper sx={{
+          p: 4,
           borderRadius: 3,
           boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
           background: 'linear-gradient(145deg, #ffffff, #f8fafc)'
@@ -681,7 +682,7 @@ export default function PaymentPage() {
                 disabled={activeStep === 0}
                 onClick={handleBack}
                 startIcon={<ArrowBackIcon />}
-                sx={{ 
+                sx={{
                   background: 'transparent',
                   color: '#64748B',
                   border: '1px solid #e2e8f0',
@@ -696,7 +697,7 @@ export default function PaymentPage() {
               >
                 Back
               </Button>
-              
+
               <Box sx={{ display: 'flex', gap: 2 }}>
                 {activeStep === 2 ? (
                   <Button
@@ -714,7 +715,7 @@ export default function PaymentPage() {
                       fontWeight: 600,
                       fontSize: '1.1rem',
                       boxShadow: '0 4px 6px rgba(102, 126, 234, 0.25)',
-                      '&:hover': { 
+                      '&:hover': {
                         boxShadow: '0 6px 8px rgba(102, 126, 234, 0.4)',
                         transform: 'translateY(-1px)'
                       }
@@ -736,7 +737,7 @@ export default function PaymentPage() {
                       fontWeight: 600,
                       fontSize: '1.1rem',
                       boxShadow: '0 4px 6px rgba(102, 126, 234, 0.25)',
-                      '&:hover': { 
+                      '&:hover': {
                         boxShadow: '0 6px 8px rgba(102, 126, 234, 0.4)',
                         transform: 'translateY(-1px)'
                       }

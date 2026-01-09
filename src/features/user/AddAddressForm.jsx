@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  Box, 
-  TextField, 
-  Button, 
-  Typography, 
-  Alert, 
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Alert,
   Paper,
   Grid,
   InputAdornment,
@@ -18,7 +18,7 @@ import {
   Divider,
   Modal
 } from '@mui/material';
-import { 
+import {
   Home as HomeIcon,
   LocationOn as LocationIcon,
   Phone as PhoneIcon,
@@ -27,6 +27,7 @@ import {
   MyLocation as MyLocationIcon
 } from '@mui/icons-material';
 import { useAuth } from '../auth/AuthContext';
+import { API_BASE } from '../../config/api';
 import AddressMap from './AddressMap';
 
 const DEFAULT_CENTER = { lat: 28.6139, lng: 77.2090 };
@@ -57,7 +58,7 @@ const AddAddressForm = ({ onSuccess }) => {
 
   const validateField = (name, value) => {
     const errors = { ...fieldErrors };
-    
+
     switch (name) {
       case 'house':
         if (!value.trim()) errors.house = 'House/Flat number is required';
@@ -91,7 +92,7 @@ const AddAddressForm = ({ onSuccess }) => {
       default:
         break;
     }
-    
+
     setFieldErrors(errors);
   };
 
@@ -117,14 +118,14 @@ const AddAddressForm = ({ onSuccess }) => {
           setLat(latitude);
           setLng(longitude);
           setMapCenter({ lat: latitude, lng: longitude });
-          
+
           // Reverse geocode to get address
           try {
             const response = await fetch(
               `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
             );
             const data = await response.json();
-            
+
             if (data && data.address) {
               setFullAddress(data.display_name);
               setCity(data.address.city || data.address.town || data.address.village || '');
@@ -137,7 +138,7 @@ const AddAddressForm = ({ onSuccess }) => {
           } catch (error) {
             console.error('Reverse geocoding error:', error);
           }
-          
+
           setLocationLoading(false);
           setShowMap(true);
         },
@@ -203,7 +204,7 @@ const AddAddressForm = ({ onSuccess }) => {
         validateField(field, value);
         return !value.trim();
       });
-      
+
       if (hasErrors || Object.keys(fieldErrors).length > 0) {
         setError('Please fill in all required fields correctly');
         return;
@@ -229,9 +230,9 @@ const AddAddressForm = ({ onSuccess }) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
+
     try {
-      const response = await fetch('http://localhost:5236/api/Address/AddForCurrentUser', {
+      const response = await fetch(`${API_BASE}/Address/AddForCurrentUser`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -239,7 +240,7 @@ const AddAddressForm = ({ onSuccess }) => {
         },
         body: JSON.stringify({ house, street, landmark, city, state, pincode, phone, lat, lng })
       });
-      
+
       if (response.ok) {
         onSuccess && onSuccess();
       } else {
@@ -261,7 +262,7 @@ const AddAddressForm = ({ onSuccess }) => {
             <Typography variant="h6" sx={{ mb: 3, color: '#1f2937', fontWeight: 600 }}>
               Enter Your Address Details
             </Typography>
-            
+
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
                 <TextField
@@ -281,7 +282,7 @@ const AddAddressForm = ({ onSuccess }) => {
                   }}
                 />
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
@@ -300,7 +301,7 @@ const AddAddressForm = ({ onSuccess }) => {
                   }}
                 />
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
@@ -310,7 +311,7 @@ const AddAddressForm = ({ onSuccess }) => {
                   className="address-input"
                 />
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
@@ -322,7 +323,7 @@ const AddAddressForm = ({ onSuccess }) => {
                   className="address-input"
                 />
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
@@ -334,7 +335,7 @@ const AddAddressForm = ({ onSuccess }) => {
                   className="address-input"
                 />
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
@@ -347,7 +348,7 @@ const AddAddressForm = ({ onSuccess }) => {
                   inputProps={{ maxLength: 6 }}
                 />
               </Grid>
-              
+
               <Grid item xs={12}>
                 <TextField
                   fullWidth
@@ -368,7 +369,7 @@ const AddAddressForm = ({ onSuccess }) => {
                 />
               </Grid>
             </Grid>
-            
+
             <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
               <Button
                 variant="outlined"
@@ -390,14 +391,14 @@ const AddAddressForm = ({ onSuccess }) => {
             </Box>
           </Box>
         );
-        
+
       case 1:
         return (
           <Box>
             <Typography variant="h6" sx={{ mb: 3, color: '#1f2937', fontWeight: 600 }}>
               Select Your Location on Map
             </Typography>
-            
+
             {fullAddress && (
               <Alert severity="info" sx={{ mb: 3 }}>
                 <Typography variant="body2">
@@ -405,28 +406,28 @@ const AddAddressForm = ({ onSuccess }) => {
                 </Typography>
               </Alert>
             )}
-            
+
             <Box className="map-container">
-              <AddressMap 
-                onAddressSelect={handleMapSelect} 
-                center={mapCenter} 
-                size={{ width: '100%', height: 400 }} 
+              <AddressMap
+                onAddressSelect={handleMapSelect}
+                center={mapCenter}
+                size={{ width: '100%', height: 400 }}
               />
             </Box>
-            
+
             <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
               Click on the map to select your exact location
             </Typography>
           </Box>
         );
-        
+
       case 2:
         return (
           <Box>
             <Typography variant="h6" sx={{ mb: 3, color: '#1f2937', fontWeight: 600 }}>
               Confirm Your Address
             </Typography>
-            
+
             <Card variant="outlined" sx={{ mb: 3 }}>
               <CardContent>
                 <Grid container spacing={2}>
@@ -465,7 +466,7 @@ const AddAddressForm = ({ onSuccess }) => {
                 </Grid>
               </CardContent>
             </Card>
-            
+
             {fullAddress && (
               <Alert severity="success" sx={{ mb: 3 }}>
                 <Typography variant="body2">
@@ -475,7 +476,7 @@ const AddAddressForm = ({ onSuccess }) => {
             )}
           </Box>
         );
-        
+
       default:
         return null;
     }
@@ -483,10 +484,10 @@ const AddAddressForm = ({ onSuccess }) => {
 
   return (
     <Box sx={{ minHeight: '100vh', background: 'var(--main-bg)', py: 4 }}>
-      <Paper sx={{ 
-        maxWidth: 800, 
-        mx: 'auto', 
-        p: 4, 
+      <Paper sx={{
+        maxWidth: 800,
+        mx: 'auto',
+        p: 4,
         borderRadius: 3,
         background: 'var(--glass)',
         backdropFilter: 'blur(20px)',
@@ -494,7 +495,7 @@ const AddAddressForm = ({ onSuccess }) => {
         border: '1px solid var(--border)'
       }}>
         <Box sx={{ textAlign: 'center', mb: 4 }}>
-          <Typography variant="h4" sx={{ 
+          <Typography variant="h4" sx={{
             fontWeight: 700,
             background: 'var(--brand-gradient)',
             backgroundClip: 'text',
@@ -535,7 +536,7 @@ const AddAddressForm = ({ onSuccess }) => {
             disabled={activeStep === 0}
             onClick={handleBack}
             variant="outlined"
-            sx={{ 
+            sx={{
               borderColor: 'var(--border)',
               color: 'var(--muted)',
               '&:hover': {
@@ -546,7 +547,7 @@ const AddAddressForm = ({ onSuccess }) => {
           >
             Back
           </Button>
-          
+
           {activeStep === steps.length - 1 ? (
             <Button
               variant="contained"

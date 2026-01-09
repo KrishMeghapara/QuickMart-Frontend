@@ -57,8 +57,9 @@ import './UserProfile.css';
 import AddAddressForm from '../features/user/AddAddressForm';
 import ProfilePictureUpload from '../features/user/ProfilePictureUpload';
 import apiService from '../services/apiService';
+import { API_BASE } from '../config/api';
 
-const API_BASE_URL = 'http://localhost:5236/api';
+const API_BASE_URL = API_BASE;
 
 export default function UserProfile() {
   const { user, token, updateUser } = useAuth();
@@ -103,7 +104,7 @@ export default function UserProfile() {
     try {
       setIsLoading(true);
       setError('');
-      
+
       // Fetch address, orders, and profile in parallel
       const [addressResponse, ordersResponse, profileResponse] = await Promise.allSettled([
         fetchUserAddress(),
@@ -152,7 +153,7 @@ export default function UserProfile() {
       if (response.ok) {
         const addressData = await response.json();
         console.log('Fetched address data:', addressData);
-        
+
         // Handle single address (convert to array for consistency)
         if (addressData && !Array.isArray(addressData)) {
           const addressArray = [{
@@ -243,7 +244,7 @@ export default function UserProfile() {
     try {
       setIsSaving(true);
       setError('');
-      
+
       const response = await fetch(`${API_BASE_URL}/Address/UpdateForCurrentUser`, {
         method: 'PUT',
         headers: {
@@ -274,7 +275,7 @@ export default function UserProfile() {
       setError('New passwords do not match');
       return;
     }
-    
+
     if (newPassword.length < 6) {
       setError('Password must be at least 6 characters');
       return;
@@ -283,7 +284,7 @@ export default function UserProfile() {
     try {
       setIsSaving(true);
       setError('');
-      
+
       // Call API to change password
       const response = await fetch(`${API_BASE_URL}/User/ChangePassword`, {
         method: 'POST',
@@ -338,7 +339,7 @@ export default function UserProfile() {
           try {
             // Use reverse geocoding to get address from coordinates
             const { latitude, longitude } = position.coords;
-            
+
             // For demo purposes, set approximate location
             setFormData(prev => ({
               ...prev,
@@ -346,7 +347,7 @@ export default function UserProfile() {
               state: 'Gujarat',
               pincode: '360001'
             }));
-            
+
             setSuccess('Location detected! Please complete the address details.');
             setTimeout(() => setSuccess(''), 3000);
           } catch (error) {
@@ -389,23 +390,23 @@ export default function UserProfile() {
     try {
       setIsSaving(true);
       setError('');
-      
+
       const addressId = addressToDelete?.AddressID || addressToDelete?.addressID || addressToDelete?.id;
       if (!addressId) {
         throw new Error('Could not find address ID');
       }
-      
+
       await apiService.deleteAddress(addressId);
-      
+
       setSuccess('Address deleted successfully!');
-      setAddresses(prev => prev.filter(addr => 
+      setAddresses(prev => prev.filter(addr =>
         (addr.AddressID || addr.addressID) !== addressId
       ));
-      
+
       if (defaultAddressId === addressId) {
         setDefaultAddressId(null);
       }
-      
+
       setShowDeleteDialog(false);
       setAddressToDelete(null);
       setTimeout(() => setSuccess(''), 3000);
@@ -455,11 +456,11 @@ export default function UserProfile() {
 
   if (isLoading) {
     return (
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        minHeight: '60vh' 
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '60vh'
       }}>
         <CircularProgress size={60} sx={{ color: '#667eea' }} />
       </Box>
@@ -487,9 +488,9 @@ export default function UserProfile() {
       {/* Header */}
       <Box sx={{ mb: { xs: 3, md: 4 } }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-          <Typography sx={{ 
+          <Typography sx={{
             fontSize: { xs: '2.25rem', md: '3.5rem' },
-            fontWeight: 800, 
+            fontWeight: 800,
             background: 'linear-gradient(45deg, #10b981 0%, #059669 100%)',
             backgroundClip: 'text',
             WebkitBackgroundClip: 'text',
@@ -540,8 +541,8 @@ export default function UserProfile() {
         {/* Left Column - Profile Info */}
         <Grid item xs={12} md={5} lg={4} sx={{ minWidth: '320px' }}>
           <Fade in={true} timeout={600}>
-            <Card sx={{ 
-              borderRadius: '24px', 
+            <Card sx={{
+              borderRadius: '24px',
               boxShadow: 'var(--soft-shadow)',
               border: '1px solid var(--border)',
               background: 'var(--glass)',
@@ -565,9 +566,9 @@ export default function UserProfile() {
                     }
                   }}>
                     {(user?.profilePicture || user?.googlePicture) ? (
-                      <img 
-                        src={user?.profilePicture ? 
-                          (user.profilePicture.startsWith('http') ? user.profilePicture : `http://localhost:5236${user.profilePicture}`) 
+                      <img
+                        src={user?.profilePicture ?
+                          (user.profilePicture.startsWith('http') ? user.profilePicture : `${API_BASE_URL.replace('/api', '')}${user.profilePicture}`)
                           : user?.googlePicture}
                         alt={user?.UserName || 'User Avatar'}
                         style={{
@@ -581,10 +582,10 @@ export default function UserProfile() {
                         }}
                       />
                     ) : (
-                      <Avatar 
-                        sx={{ 
-                          width: 100, 
-                          height: 100, 
+                      <Avatar
+                        sx={{
+                          width: 100,
+                          height: 100,
                           border: '6px solid white',
                           background: 'var(--surface)',
                           boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
@@ -602,17 +603,17 @@ export default function UserProfile() {
                     {user?.UserName || user?.userName || user?.googleName || 'User Name'}
                   </Typography>
                   {user?.isGoogleUser && (
-                    <Chip 
+                    <Chip
                       icon={<StarIcon sx={{ fontSize: 14 }} />}
-                      label="Verified" 
-                      size="small" 
-                      sx={{ 
+                      label="Verified"
+                      size="small"
+                      sx={{
                         background: 'var(--success)',
                         color: 'white',
                         fontWeight: 600,
                         fontSize: '0.7rem',
                         height: '20px'
-                      }} 
+                      }}
                     />
                   )}
                 </Box>
@@ -625,7 +626,7 @@ export default function UserProfile() {
                   <Button
                     fullWidth
                     startIcon={<CheckIcon />}
-                    sx={{ 
+                    sx={{
                       mb: 2,
                       background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)',
                       color: '#166534',
@@ -653,10 +654,10 @@ export default function UserProfile() {
                     <Box sx={{ mb: 1 }}>
                       <OrderIcon sx={{ fontSize: 24, color: orders.length > 0 ? '#10b981' : 'var(--muted)', mb: 0.5 }} />
                     </Box>
-                    <Typography variant="h6" sx={{ 
-                      fontWeight: 700, 
-                      color: orders.length > 0 ? '#10b981' : 'var(--muted)', 
-                      fontSize: '1.2rem' 
+                    <Typography variant="h6" sx={{
+                      fontWeight: 700,
+                      color: orders.length > 0 ? '#10b981' : 'var(--muted)',
+                      fontSize: '1.2rem'
                     }}>
                       {orders.length}
                     </Typography>
@@ -668,10 +669,10 @@ export default function UserProfile() {
                     <Box sx={{ mb: 1 }}>
                       <ShoppingBagIcon sx={{ fontSize: 24, color: cart.length > 0 ? '#f59e0b' : 'var(--muted)', mb: 0.5 }} />
                     </Box>
-                    <Typography variant="h6" sx={{ 
-                      fontWeight: 700, 
-                      color: cart.length > 0 ? '#f59e0b' : 'var(--muted)', 
-                      fontSize: '1.2rem' 
+                    <Typography variant="h6" sx={{
+                      fontWeight: 700,
+                      color: cart.length > 0 ? '#f59e0b' : 'var(--muted)',
+                      fontSize: '1.2rem'
                     }}>
                       {cart.length}
                     </Typography>
@@ -683,10 +684,10 @@ export default function UserProfile() {
                     <Box sx={{ mb: 1 }}>
                       <LocationIcon sx={{ fontSize: 24, color: addresses.length > 0 ? '#10b981' : 'var(--muted)', mb: 0.5 }} />
                     </Box>
-                    <Typography variant="h6" sx={{ 
-                      fontWeight: 700, 
-                      color: addresses.length > 0 ? '#10b981' : 'var(--muted)', 
-                      fontSize: '1.2rem' 
+                    <Typography variant="h6" sx={{
+                      fontWeight: 700,
+                      color: addresses.length > 0 ? '#10b981' : 'var(--muted)',
+                      fontSize: '1.2rem'
                     }}>
                       {addresses.length}
                     </Typography>
@@ -779,8 +780,8 @@ export default function UserProfile() {
         {/* Right Column - Content */}
         <Grid item xs={12} md={7} lg={8} sx={{ minWidth: { md: '760px' } }}>
           <Fade in={true} timeout={1000}>
-            <Card sx={{ 
-              borderRadius: '20px', 
+            <Card sx={{
+              borderRadius: '20px',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
               border: '1px solid rgba(255, 255, 255, 0.3)',
               background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.995))',
@@ -842,10 +843,10 @@ export default function UserProfile() {
                       <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: '#111827' }}>
                         Personal Information
                       </Typography>
-                      
+
                       {/* Profile Picture Upload */}
-                      <ProfilePictureUpload 
-                        user={user} 
+                      <ProfilePictureUpload
+                        user={user}
                         onProfileUpdate={handleProfileUpdate}
                       />
 
@@ -870,7 +871,7 @@ export default function UserProfile() {
                         </Grid>
                         <Grid item xs={12}>
                           <Typography variant="body2" color="text.secondary">
-                            {user?.isGoogleUser 
+                            {user?.isGoogleUser
                               ? 'Profile information is managed through your Google account.'
                               : 'Contact support to update your profile information.'
                             }
@@ -902,7 +903,7 @@ export default function UserProfile() {
                           variant="contained"
                           startIcon={<AddIcon />}
                           onClick={() => setShowAddressDialog(true)}
-                          sx={{ 
+                          sx={{
                             borderRadius: 3,
                             background: 'linear-gradient(135deg, #10b981, #059669)',
                             boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
@@ -925,12 +926,12 @@ export default function UserProfile() {
                             const addressId = address.AddressID || address.addressID;
                             const isDefault = addressId === defaultAddressId;
                             const isEditing = addressId === editingAddressId;
-                            
+
                             return (
                               <Grid item xs={12} key={addressId}>
                                 <Fade in={true} timeout={400}>
-                                  <Card sx={{ 
-                                    border: isDefault ? '2px solid #10b981' : '1px solid #e0e0e0', 
+                                  <Card sx={{
+                                    border: isDefault ? '2px solid #10b981' : '1px solid #e0e0e0',
                                     borderRadius: 4,
                                     background: isDefault ? 'rgba(16, 185, 129, 0.03)' : 'white',
                                     boxShadow: isDefault ? '0 4px 20px rgba(16, 185, 129, 0.15)' : '0 2px 12px rgba(0, 0, 0, 0.05)',
@@ -980,7 +981,7 @@ export default function UserProfile() {
                                               }}
                                             />
                                           </Box>
-                                          
+
                                           {!isEditing ? (
                                             <>
                                               <Typography variant="body1" sx={{ fontWeight: 600, mb: 1, color: '#111827' }}>
@@ -1071,7 +1072,7 @@ export default function UserProfile() {
                                             </Box>
                                           )}
                                         </Box>
-                                        
+
                                         {!isEditing && (
                                           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml: 2 }}>
                                             {!isDefault && (
@@ -1207,8 +1208,8 @@ export default function UserProfile() {
                           })}
                         </Grid>
                       ) : (
-                        <Box sx={{ 
-                          textAlign: 'center', 
+                        <Box sx={{
+                          textAlign: 'center',
                           py: 8,
                           border: '2px dashed rgba(16, 185, 129, 0.3)',
                           borderRadius: 4,
@@ -1275,8 +1276,8 @@ export default function UserProfile() {
                       {orders.length > 0 ? (
                         <List sx={{ p: 0 }}>
                           {orders.map((order, index) => (
-                            <Card key={order.orderID} sx={{ 
-                              mb: 2, 
+                            <Card key={order.orderID} sx={{
+                              mb: 2,
                               border: '1px solid #e0e0e0',
                               borderRadius: 4,
                               boxShadow: '0 2px 12px rgba(0, 0, 0, 0.05)',
@@ -1320,7 +1321,7 @@ export default function UserProfile() {
                                   <Button
                                     variant="contained"
                                     size="small"
-                                    sx={{ 
+                                    sx={{
                                       mr: 1,
                                       background: 'linear-gradient(135deg, #10b981, #059669)',
                                       borderRadius: 2,
@@ -1359,8 +1360,8 @@ export default function UserProfile() {
                           ))}
                         </List>
                       ) : (
-                        <Box sx={{ 
-                          textAlign: 'center', 
+                        <Box sx={{
+                          textAlign: 'center',
                           py: 8,
                           border: '2px dashed rgba(16, 185, 129, 0.3)',
                           borderRadius: 4,
@@ -1422,8 +1423,8 @@ export default function UserProfile() {
       </Grid>
 
       {/* Address Dialog */}
-      <Dialog 
-        open={showAddressDialog} 
+      <Dialog
+        open={showAddressDialog}
         onClose={() => setShowAddressDialog(false)}
         maxWidth="md"
         fullWidth
@@ -1445,8 +1446,8 @@ export default function UserProfile() {
       </Dialog>
 
       {/* Password Change Dialog */}
-      <Dialog 
-        open={showPasswordDialog} 
+      <Dialog
+        open={showPasswordDialog}
         onClose={() => setShowPasswordDialog(false)}
         maxWidth="sm"
         fullWidth
@@ -1525,8 +1526,8 @@ export default function UserProfile() {
       </Dialog>
 
       {/* Delete Address Confirmation Dialog */}
-      <Dialog 
-        open={showDeleteDialog} 
+      <Dialog
+        open={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
         maxWidth="sm"
         PaperProps={{

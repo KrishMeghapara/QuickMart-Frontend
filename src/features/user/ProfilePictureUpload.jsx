@@ -21,6 +21,7 @@ import {
   Close as CloseIcon
 } from '@mui/icons-material';
 import apiService from '../../services/apiService';
+import { API_BASE } from '../../config/api';
 
 const ProfilePictureUpload = ({ user, onProfileUpdate }) => {
   const [isUploading, setIsUploading] = useState(false);
@@ -67,23 +68,23 @@ const ProfilePictureUpload = ({ user, onProfileUpdate }) => {
       const file = fileInputRef.current.files[0];
       const result = await apiService.uploadProfilePicture(file);
 
-             if (result.success) {
-         setSuccess('Profile picture uploaded successfully!');
-         // Update the user context with new profile picture
-         if (onProfileUpdate) {
-           onProfileUpdate({ ...user, profilePicture: result.profilePictureUrl });
-         }
-         setShowPreview(false);
-         setPreviewImage(null);
-         // Clear the file input
-         if (fileInputRef.current) {
-           fileInputRef.current.value = '';
-         }
-         // Force a page refresh to show the new profile picture
-         setTimeout(() => {
-           window.location.reload();
-         }, 1000);
-       }
+      if (result.success) {
+        setSuccess('Profile picture uploaded successfully!');
+        // Update the user context with new profile picture
+        if (onProfileUpdate) {
+          onProfileUpdate({ ...user, profilePicture: result.profilePictureUrl });
+        }
+        setShowPreview(false);
+        setPreviewImage(null);
+        // Clear the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        // Force a page refresh to show the new profile picture
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
     } catch (error) {
       setError(error.message || 'Failed to upload profile picture');
     } finally {
@@ -126,14 +127,14 @@ const ProfilePictureUpload = ({ user, onProfileUpdate }) => {
     if (user?.profilePicture) {
       // If it's a relative path, prepend the API base URL
       if (user.profilePicture.startsWith('/')) {
-        return `http://localhost:5236${user.profilePicture}`;
+        return `${API_BASE.replace('/api', '')}${user.profilePicture}`;
       }
       // If it's already a full URL, return as is
       if (user.profilePicture.startsWith('http')) {
         return user.profilePicture;
       }
       // Otherwise, assume it's a relative path
-      return `http://localhost:5236${user.profilePicture}`;
+      return `${API_BASE.replace('/api', '')}${user.profilePicture}`;
     }
     return null;
   };
@@ -207,17 +208,17 @@ const ProfilePictureUpload = ({ user, onProfileUpdate }) => {
           />
         </Box>
 
-                 {/* File Upload Info */}
-         <Typography variant="body2" color="text.secondary" align="center">
-           Supported formats: JPG, JPEG (max 5MB)
-         </Typography>
-         
-         {/* Debug Info - Remove this in production */}
-         {profilePictureUrl && (
-           <Typography variant="caption" color="text.secondary" align="center" sx={{ mt: 1, display: 'block' }}>
-             Debug: {profilePictureUrl}
-           </Typography>
-         )}
+        {/* File Upload Info */}
+        <Typography variant="body2" color="text.secondary" align="center">
+          Supported formats: JPG, JPEG (max 5MB)
+        </Typography>
+
+        {/* Debug Info - Remove this in production */}
+        {profilePictureUrl && (
+          <Typography variant="caption" color="text.secondary" align="center" sx={{ mt: 1, display: 'block' }}>
+            Debug: {profilePictureUrl}
+          </Typography>
+        )}
       </CardContent>
 
       {/* Preview Dialog */}
