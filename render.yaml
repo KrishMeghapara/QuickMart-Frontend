@@ -1,0 +1,21 @@
+# Render Blueprint for QuickMart Frontend
+# This file configures automatic deployment
+
+services:
+  - type: static
+    name: quickmart-frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false  # Set this manually to your backend URL
+      - key: VITE_GOOGLE_CLIENT_ID
+        sync: false  # Set this manually
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: public, max-age=31536000
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

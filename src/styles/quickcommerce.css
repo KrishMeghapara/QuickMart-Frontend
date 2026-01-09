@@ -1,0 +1,219 @@
+/* Quick Commerce Specific Styles */
+
+/* Pulse animation for urgency indicators */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Quick Commerce Color Variables */
+:root {
+  /* Primary Quick Commerce Colors */
+  --qc-green: #10b981;
+  --qc-green-dark: #059669;
+  --qc-green-light: #34d399;
+  --qc-green-bg: rgba(16, 185, 129, 0.1);
+  
+  /* Urgency Colors */
+  --qc-orange: #f59e0b;
+  --qc-orange-dark: #d97706;
+  --qc-red: #ef4444;
+  --qc-red-dark: #dc2626;
+  
+  /* Quick Commerce Gradients */
+  --qc-primary-gradient: linear-gradient(135deg, #10b981, #059669);
+  --qc-urgency-gradient: linear-gradient(135deg, #f59e0b, #d97706);
+  --qc-danger-gradient: linear-gradient(135deg, #ef4444, #dc2626);
+  
+  /* Shadows */
+  --qc-green-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  --qc-orange-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  --qc-red-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* Quick Commerce specific animations */
+.qc-pulse {
+  animation: pulse 2s infinite;
+}
+
+.qc-bounce {
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0,0,0);
+  }
+  40%, 43% {
+    transform: translate3d(0,-8px,0);
+  }
+  70% {
+    transform: translate3d(0,-4px,0);
+  }
+  90% {
+    transform: translate3d(0,-2px,0);
+  }
+}
+
+/* Delivery time indicator styles */
+.delivery-badge {
+  background: var(--qc-primary-gradient);
+  color: white;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  box-shadow: var(--qc-green-shadow);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.urgency-badge {
+  background: var(--qc-urgency-gradient);
+  color: white;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 0.7rem;
+  box-shadow: var(--qc-orange-shadow);
+  animation: pulse 2s infinite;
+}
+
+.popular-badge {
+  background: var(--qc-danger-gradient);
+  color: white;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 0.7rem;
+  box-shadow: var(--qc-red-shadow);
+}
+
+/* Quick add button styles */
+.quick-add-btn {
+  background: var(--qc-primary-gradient);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--qc-green-shadow);
+}
+
+.quick-add-btn:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* Location selector styles */
+.location-selector {
+  background: var(--qc-green-bg);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.location-selector:hover {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+/* Quick Commerce specific typography */
+.qc-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  color: #111827;
+}
+
+.qc-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.qc-price {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  color: var(--qc-green);
+  font-size: 1.4rem;
+}
+
+.qc-delivery-time {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  color: var(--qc-green);
+  font-size: 0.8rem;
+}
+
+/* Responsive adjustments for Quick Commerce */
+@media (max-width: 768px) {
+  .delivery-badge {
+    font-size: 0.7rem;
+    padding: 3px 6px;
+  }
+  
+  .urgency-badge,
+  .popular-badge {
+    font-size: 0.65rem;
+    padding: 2px 4px;
+  }
+  
+  .qc-price {
+    font-size: 1.2rem;
+  }
+}
+
+/* Loading shimmer for Quick Commerce */
+.qc-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Quick Commerce card hover effects */
+.qc-product-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.qc-product-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+  border-color: var(--qc-green);
+  border-top: 2px solid var(--qc-green);
+}
+
+.qc-product-card:hover .qc-product-image {
+  transform: scale(1.08);
+}
+
+.qc-product-image {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
