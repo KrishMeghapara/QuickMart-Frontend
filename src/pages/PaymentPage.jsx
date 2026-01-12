@@ -612,7 +612,7 @@ export default function PaymentPage() {
         <Box sx={{ mb: 4, textAlign: 'center' }}>
           <Typography variant="h3" sx={{
             fontWeight: 600,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
             backgroundClip: 'text',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
@@ -621,7 +621,7 @@ export default function PaymentPage() {
             Secure Checkout
           </Typography>
           <Typography variant="h6" sx={{ color: '#64748B', fontWeight: 300 }}>
-            Complete your purchase in just a few steps
+            Complete your purchase • Delivery in 12 minutes ⚡
           </Typography>
         </Box>
 

@@ -1,15 +1,15 @@
 import React, { useState } from "react";
-import { 
-  Drawer, 
-  Box, 
-  Typography, 
-  IconButton, 
-  List, 
-  ListItem, 
-  ListItemText, 
-  ListItemSecondaryAction, 
-  Button, 
-  Divider, 
+import {
+  Drawer,
+  Box,
+  Typography,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
+  Button,
+  Divider,
   Input,
   Avatar,
   Chip
@@ -62,12 +62,12 @@ export default function CartDrawer({ open, onClose }) {
 
   return (
     <Drawer anchor="right" open={open} onClose={onClose}>
-      <Box sx={{ 
-        width: { xs: '100vw', sm: 420, md: 480 }, 
+      <Box sx={{
+        width: { xs: '100vw', sm: 420, md: 480 },
         maxWidth: '100vw',
-        p: { xs: 2, sm: 3 }, 
-        display: 'flex', 
-        flexDirection: 'column', 
+        p: { xs: 2, sm: 3 },
+        display: 'flex',
+        flexDirection: 'column',
         height: '100%',
         background: 'var(--glass)',
         backdropFilter: 'blur(20px)',
@@ -75,36 +75,36 @@ export default function CartDrawer({ open, onClose }) {
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <ShoppingBagIcon sx={{ mr: 1, color: '#10b981' }} />
-          <Typography 
-            variant="h5" 
-            sx={{ 
-              flexGrow: 1, 
+          <Typography
+            variant="h5"
+            sx={{
+              flexGrow: 1,
               fontWeight: 700,
               color: 'var(--text)'
             }}
           >
             Shopping Cart
           </Typography>
-          <Chip 
-            label={`${cart.length} items`} 
-            size="small" 
-            sx={{ 
-              background: 'linear-gradient(135deg, #10b981, #059669)', 
+          <Chip
+            label={`${cart.length} items`}
+            size="small"
+            sx={{
+              background: 'linear-gradient(135deg, #10b981, #059669)',
               color: 'white',
               fontWeight: 600,
               mr: 1,
               borderRadius: '12px',
               boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
-            }} 
+            }}
           />
           <IconButton onClick={onClose}><CloseIcon /></IconButton>
         </Box>
 
         {/* Delivery Info */}
-        <Box sx={{ 
-          mb: 3, 
-          p: 2, 
-          bgcolor: 'rgba(16, 185, 129, 0.1)', 
+        <Box sx={{
+          mb: 3,
+          p: 2,
+          bgcolor: 'rgba(16, 185, 129, 0.1)',
           borderRadius: 2,
           border: '1px solid rgba(16, 185, 129, 0.2)'
         }}>
@@ -129,8 +129,8 @@ export default function CartDrawer({ open, onClose }) {
           {loading ? (
             <CartSkeleton />
           ) : error ? (
-            <Box sx={{ 
-              textAlign: 'center', 
+            <Box sx={{
+              textAlign: 'center',
               py: 6,
               color: '#ef4444'
             }}>
@@ -138,20 +138,37 @@ export default function CartDrawer({ open, onClose }) {
               <Typography variant="body2">{error}</Typography>
             </Box>
           ) : cart.length === 0 ? (
-            <Box sx={{ 
-              textAlign: 'center', 
+            <Box sx={{
+              textAlign: 'center',
               py: 6,
               color: '#6b7280'
             }}>
               <ShoppingBagIcon sx={{ fontSize: 64, mb: 2, opacity: 0.3 }} />
               <Typography variant="h6" sx={{ mb: 1 }}>Your cart is empty</Typography>
-              <Typography variant="body2">Add some products to get started!</Typography>
+              <Typography variant="body2" sx={{ mb: 3 }}>Add some products to get started!</Typography>
+              <Button
+                variant="contained"
+                onClick={onClose}
+                sx={{
+                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  borderRadius: 3,
+                  px: 4,
+                  py: 1.5,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #059669, #047857)',
+                  }
+                }}
+              >
+                Continue Shopping
+              </Button>
             </Box>
           ) : cart.map(item => (
-            <ListItem 
-              key={item.cartID} 
+            <ListItem
+              key={item.cartID}
               alignItems="flex-start"
-              sx={{ 
+              sx={{
                 mb: 2,
                 background: 'var(--surface)',
                 borderRadius: 2,
@@ -160,13 +177,33 @@ export default function CartDrawer({ open, onClose }) {
                 backdropFilter: 'blur(10px)'
               }}
             >
-              <Avatar 
-                sx={{ 
-                  mr: 2, 
+              {item.product?.productImg ? (
+                <Box
+                  component="img"
+                  src={item.product.productImg}
+                  alt={item.product?.productName || 'Product'}
+                  sx={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 2,
+                    objectFit: 'cover',
+                    mr: 2,
+                    border: '1px solid #e5e7eb'
+                  }}
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <Avatar
+                sx={{
+                  mr: 2,
+                  display: item.product?.productImg ? 'none' : 'flex',
                   background: 'linear-gradient(135deg, #e0e7ff, #8b5cf6)',
                   color: 'white',
-                  width: 48,
-                  height: 48,
+                  width: 56,
+                  height: 56,
                   fontWeight: 600,
                   boxShadow: '0 2px 8px rgba(139, 92, 246, 0.2)'
                 }}
@@ -178,16 +215,16 @@ export default function CartDrawer({ open, onClose }) {
                   <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'var(--text)' }}>
                     {item.product?.productName || 'Product'}
                   </Typography>
-                  <Chip 
-                    label={`x${item.quantity}`} 
-                    size="small" 
-                    sx={{ 
-                      bgcolor: 'var(--accent)', 
+                  <Chip
+                    label={`x${item.quantity}`}
+                    size="small"
+                    sx={{
+                      bgcolor: 'var(--accent)',
                       color: 'white',
                       fontWeight: 600,
                       fontSize: '0.75rem',
                       ml: 1
-                    }} 
+                    }}
                   />
                 </>}
                 secondary={
@@ -203,19 +240,19 @@ export default function CartDrawer({ open, onClose }) {
               />
               <ListItemSecondaryAction>
                 <Box sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
-                  <IconButton 
+                  <IconButton
                     size="small"
                     onClick={() => {
                       updateQuantity(item.cartID, Math.max(1, item.quantity - 1));
                       toast.info('Quantity updated');
                     }}
-                    sx={{ 
+                    sx={{
                       backgroundColor: '#f3f4f6',
                       color: '#374151',
                       width: 28,
                       height: 28,
                       transition: 'all 0.2s ease',
-                      '&:hover': { 
+                      '&:hover': {
                         backgroundColor: '#e5e7eb',
                         transform: 'scale(1.1)',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
@@ -224,28 +261,28 @@ export default function CartDrawer({ open, onClose }) {
                   >
                     <Typography sx={{ fontSize: '14px', fontWeight: 700 }}>-</Typography>
                   </IconButton>
-                  <Typography sx={{ 
-                    mx: 1.5, 
-                    minWidth: 20, 
+                  <Typography sx={{
+                    mx: 1.5,
+                    minWidth: 20,
                     textAlign: 'center',
                     fontWeight: 600,
                     color: 'var(--text)'
                   }}>
                     {item.quantity}
                   </Typography>
-                  <IconButton 
+                  <IconButton
                     size="small"
                     onClick={() => {
                       updateQuantity(item.cartID, item.quantity + 1);
                       toast.info('Quantity updated');
                     }}
-                    sx={{ 
+                    sx={{
                       backgroundColor: '#f3f4f6',
                       color: '#374151',
                       width: 28,
                       height: 28,
                       transition: 'all 0.2s ease',
-                      '&:hover': { 
+                      '&:hover': {
                         backgroundColor: '#e5e7eb',
                         transform: 'scale(1.1)',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
@@ -256,13 +293,13 @@ export default function CartDrawer({ open, onClose }) {
                   </IconButton>
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                  <IconButton 
+                  <IconButton
                     size="small"
                     onClick={() => saveForLater(item)}
-                    sx={{ 
+                    sx={{
                       color: '#f59e0b',
                       transition: 'all 0.2s ease',
-                      '&:hover': { 
+                      '&:hover': {
                         bgcolor: 'rgba(245, 158, 11, 0.1)',
                         transform: 'scale(1.1)'
                       }
@@ -270,16 +307,16 @@ export default function CartDrawer({ open, onClose }) {
                   >
                     <BookmarkBorderIcon sx={{ fontSize: 18 }} />
                   </IconButton>
-                  <IconButton 
+                  <IconButton
                     size="small"
                     onClick={() => {
                       removeFromCart(item.cartID);
                       toast.success('Item removed from cart');
                     }}
-                    sx={{ 
+                    sx={{
                       color: '#ef4444',
                       transition: 'all 0.2s ease',
-                      '&:hover': { 
+                      '&:hover': {
                         bgcolor: 'rgba(239, 68, 68, 0.1)',
                         transform: 'scale(1.1)'
                       }
@@ -354,10 +391,10 @@ export default function CartDrawer({ open, onClose }) {
 
         {/* Free Delivery Progress */}
         {remainingForFreeDelivery > 0 && cart.length > 0 && (
-          <Box sx={{ 
-            mb: 2, 
-            p: 2, 
-            bgcolor: 'rgba(245, 158, 11, 0.1)', 
+          <Box sx={{
+            mb: 2,
+            p: 2,
+            bgcolor: 'rgba(245, 158, 11, 0.1)',
             borderRadius: 2,
             border: '1px solid rgba(245, 158, 11, 0.2)'
           }}>
@@ -366,16 +403,16 @@ export default function CartDrawer({ open, onClose }) {
                 🚚 Add ₹{remainingForFreeDelivery} for FREE delivery
               </Typography>
             </Box>
-            <Box sx={{ 
-              width: '100%', 
-              height: 6, 
-              bgcolor: '#fef3c7', 
+            <Box sx={{
+              width: '100%',
+              height: 6,
+              bgcolor: '#fef3c7',
               borderRadius: 3,
               overflow: 'hidden'
             }}>
-              <Box sx={{ 
-                width: `${Math.min((total / freeDeliveryThreshold) * 100, 100)}%`, 
-                height: '100%', 
+              <Box sx={{
+                width: `${Math.min((total / freeDeliveryThreshold) * 100, 100)}%`,
+                height: '100%',
                 bgcolor: '#f59e0b',
                 transition: 'width 0.3s ease'
               }} />
@@ -394,7 +431,7 @@ export default function CartDrawer({ open, onClose }) {
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography variant="body1">Delivery fee:</Typography>
-            <Typography variant="body1" sx={{ 
+            <Typography variant="body1" sx={{
               fontWeight: 600,
               color: deliveryFee === 0 ? '#10b981' : 'inherit',
               textDecoration: deliveryFee === 0 ? 'line-through' : 'none'
@@ -404,18 +441,18 @@ export default function CartDrawer({ open, onClose }) {
           </Box>
           <Divider sx={{ my: 1 }} />
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography 
-              variant="h6" 
-              sx={{ 
+            <Typography
+              variant="h6"
+              sx={{
                 fontWeight: 700,
                 color: 'var(--text)'
               }}
             >
               Total:
             </Typography>
-            <Typography 
-              variant="h6" 
-              sx={{ 
+            <Typography
+              variant="h6"
+              sx={{
                 fontWeight: 700,
                 color: '#10b981',
                 fontSize: '1.4rem'
@@ -429,16 +466,16 @@ export default function CartDrawer({ open, onClose }) {
             Order in {deliveryTime - 2} mins for {deliveryTime} min delivery
           </Typography>
         </Box>
-        <Button 
-          variant="contained" 
-          fullWidth 
-          disabled={cart.length === 0} 
+        <Button
+          variant="contained"
+          fullWidth
+          disabled={cart.length === 0}
           startIcon={<LocalShippingIcon />}
           onClick={() => {
             onClose();
             navigate('/payment');
           }}
-          sx={{ 
+          sx={{
             mb: 2,
             py: 1.5,
             background: 'linear-gradient(135deg, #10b981, #059669)',
@@ -456,13 +493,13 @@ export default function CartDrawer({ open, onClose }) {
         >
           Order Now • {deliveryTime} mins
         </Button>
-        <Button 
-          variant="outlined" 
-          fullWidth 
+        <Button
+          variant="outlined"
+          fullWidth
           onClick={() => {
             clearCart();
             toast.success('Cart cleared');
-          }} 
+          }}
           disabled={cart.length === 0}
           sx={{
             borderColor: '#d1d5db',

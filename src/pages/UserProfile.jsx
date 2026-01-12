@@ -49,7 +49,8 @@ import {
   CheckCircle as CheckIcon,
   Cancel as CancelIcon,
   Visibility as VisibilityIcon,
-  VisibilityOff as VisibilityOffIcon
+  VisibilityOff as VisibilityOffIcon,
+  Logout as LogoutIcon
 } from '@mui/icons-material';
 import { useAuth } from '../features/auth/AuthContext';
 import { useCart } from '../features/cart/CartContext';
@@ -727,49 +728,27 @@ export default function UserProfile() {
                   )}
                   <Button
                     fullWidth
-                    startIcon={<NotificationsIcon />}
+                    startIcon={<LogoutIcon />}
+                    onClick={logout}
                     sx={{
-                      background: 'var(--surface)',
-                      border: '1px solid var(--border)',
+                      background: 'rgba(239, 68, 68, 0.1)',
+                      border: '1px solid rgba(239, 68, 68, 0.2)',
                       borderRadius: '12px',
                       p: 2,
                       justifyContent: 'flex-start',
-                      color: 'var(--text)',
+                      color: '#ef4444',
                       textTransform: 'none',
                       fontWeight: 600,
                       transition: 'all 0.3s ease',
                       '&:hover': {
-                        background: 'linear-gradient(135deg, #10b981, #059669)',
+                        background: '#ef4444',
                         color: 'white',
                         transform: 'translateY(-2px)',
-                        boxShadow: '0 8px 25px rgba(16, 185, 129, 0.3)'
+                        boxShadow: '0 8px 25px rgba(239, 68, 68, 0.3)'
                       }
                     }}
                   >
-                    Notifications
-                  </Button>
-                  <Button
-                    fullWidth
-                    startIcon={<SettingsIcon />}
-                    sx={{
-                      background: 'var(--surface)',
-                      border: '1px solid var(--border)',
-                      borderRadius: '12px',
-                      p: 2,
-                      justifyContent: 'flex-start',
-                      color: 'var(--text)',
-                      textTransform: 'none',
-                      fontWeight: 600,
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #10b981, #059669)',
-                        color: 'white',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 8px 25px rgba(16, 185, 129, 0.3)'
-                      }
-                    }}
-                  >
-                    Account Settings
+                    Sign Out
                   </Button>
                 </Box>
               </CardContent>
@@ -794,8 +773,7 @@ export default function UserProfile() {
                   <Box sx={{ display: 'flex', gap: 1.5, mb: 3 }}>
                     {[
                       { id: 0, label: 'Personal Info', icon: <PersonIcon /> },
-                      { id: 1, label: 'Address', icon: <LocationIcon /> },
-                      { id: 2, label: 'Orders', icon: <OrderIcon /> }
+                      { id: 1, label: 'Address', icon: <LocationIcon /> }
                     ].map((tab) => (
                       <Button
                         key={tab.id}

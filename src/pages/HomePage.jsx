@@ -26,13 +26,22 @@ export default function HomePage({ searchQuery, searchResults, onFilterApply }) 
   const navigate = useNavigate();
   const resultsRef = React.useRef(null);
 
-  // Mock data for trending items
-  const trendingInArea = [
-    { id: 1, name: 'Ice Cream - Amul', price: 120, image: '', orders: 45, deliveryTime: 8 },
-    { id: 2, name: 'Cold Drinks - Coca Cola', price: 40, image: '', orders: 38, deliveryTime: 10 },
-    { id: 3, name: 'Chips - Lays', price: 20, image: '', orders: 52, deliveryTime: 12 },
-    { id: 4, name: 'Chocolate - Dairy Milk', price: 85, image: '', orders: 29, deliveryTime: 15 }
-  ];
+  // Category emoji mapping
+  const categoryEmojis = {
+    'fruits': '🍎', 'vegetables': '🥬', 'dairy': '🥛', 'bakery': '🍞',
+    'snacks': '🍿', 'beverages': '🥤', 'meat': '🥩', 'seafood': '🦐',
+    'frozen': '🧊', 'pantry': '🥫', 'household': '🧹', 'personal care': '🧴',
+    'default': '📦'
+  };
+
+  const getCategoryEmoji = (categoryName) => {
+    if (!categoryName) return categoryEmojis.default;
+    const lower = categoryName.toLowerCase();
+    for (const [key, emoji] of Object.entries(categoryEmojis)) {
+      if (lower.includes(key)) return emoji;
+    }
+    return categoryEmojis.default;
+  };
 
   const handleFilterApply = async (filters) => {
     try {
@@ -56,8 +65,8 @@ export default function HomePage({ searchQuery, searchResults, onFilterApply }) 
   useEffect(() => {
     if (searchQuery && resultsRef.current) {
       setTimeout(() => {
-        resultsRef.current?.scrollIntoView({ 
-          behavior: 'smooth', 
+        resultsRef.current?.scrollIntoView({
+          behavior: 'smooth',
           block: 'start'
         });
       }, 100);
@@ -72,7 +81,7 @@ export default function HomePage({ searchQuery, searchResults, onFilterApply }) 
         const loadedCategories = await withCache(apiService.getCategories.bind(apiService), 'categories')();
         console.log('Categories loaded:', loadedCategories);
         setLocalCategories(loadedCategories);
-        
+
         const prods = {};
         await Promise.all(
           loadedCategories.map(async cat => {
@@ -130,7 +139,7 @@ export default function HomePage({ searchQuery, searchResults, onFilterApply }) 
 
 
 
-      {/* Trending in Your Area */}
+      {/* Trending Products - Dynamic from Categories */}
       <Container maxWidth="xl" sx={{ py: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
           <Typography variant="h5" sx={{ fontWeight: 700, color: '#111827' }}>
@@ -140,63 +149,84 @@ export default function HomePage({ searchQuery, searchResults, onFilterApply }) 
             Hot right now
           </Typography>
         </Box>
-        <Box sx={{ 
-          display: 'grid', 
-          gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' }, 
-          gap: 2, 
-          mb: 6 
+        <Box sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
+          gap: 2,
+          mb: 6
         }}>
-          {trendingInArea.map((item, index) => (
-            <Fade in={true} timeout={500 + index * 100} key={item.id}>
-              <Box sx={{
-                p: 2,
-                bgcolor: 'white',
-                borderRadius: 2,
-                border: '1px solid #e5e7eb',
-                cursor: 'pointer',
-                position: 'relative',
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 4px 12px rgba(239, 68, 68, 0.15)',
-                  borderColor: '#ef4444'
-                }
-              }}>
+          {/* Get first 4 products from all categories */}
+          {Object.values(categoryProducts).flat().slice(0, 4).map((product, index) => (
+            <Fade in={true} timeout={500 + index * 100} key={product?.productID || index}>
+              <Box
+                onClick={() => addToCart(product)}
+                sx={{
+                  p: 2,
+                  bgcolor: 'white',
+                  borderRadius: 2,
+                  border: '1px solid #e5e7eb',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.15)',
+                    borderColor: '#10b981'
+                  }
+                }}
+              >
                 <Chip
-                  label={`${item.orders} ordered today`}
+                  label="⚡ Quick Add"
                   size="small"
                   sx={{
                     position: 'absolute',
                     top: 8,
                     right: 8,
-                    bgcolor: '#ef4444',
+                    bgcolor: '#10b981',
                     color: 'white',
                     fontWeight: 600,
                     fontSize: '0.7rem',
                     height: '18px'
                   }}
                 />
-                <Box sx={{ 
-                  height: 60, 
-                  bgcolor: '#f3f4f6', 
-                  borderRadius: 1, 
-                  mb: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.5rem'
-                }}>
-                  🔥
-                </Box>
+                {product?.productImg ? (
+                  <Box
+                    component="img"
+                    src={product.productImg}
+                    alt={product?.productName}
+                    sx={{
+                      height: 70,
+                      width: '100%',
+                      objectFit: 'contain',
+                      borderRadius: 1,
+                      mb: 1,
+                      bgcolor: '#f9fafb'
+                    }}
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                ) : (
+                  <Box sx={{
+                    height: 70,
+                    bgcolor: '#f3f4f6',
+                    borderRadius: 1,
+                    mb: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '2rem'
+                  }}>
+                    {getCategoryEmoji(product?.category?.categoryName)}
+                  </Box>
+                )}
                 <Typography sx={{ fontWeight: 600, fontSize: '0.85rem', mb: 0.5, color: '#111827' }}>
-                  {item.name}
+                  {product?.productName || 'Product'}
                 </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography sx={{ color: '#10b981', fontWeight: 700, fontSize: '0.9rem' }}>
-                    ₹{item.price}
+                    ₹{product?.productPrice || 0}
                   </Typography>
                   <Typography sx={{ color: '#6b7280', fontSize: '0.75rem' }}>
-                    {item.deliveryTime} mins
+                    12 mins
                   </Typography>
                 </Box>
               </Box>
@@ -208,7 +238,7 @@ export default function HomePage({ searchQuery, searchResults, onFilterApply }) 
 
 
       <Container maxWidth="xl" sx={{ py: 2 }} id="products-section" ref={resultsRef}>
-            {showFilters ? (
+        {showFilters ? (
           <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Typography variant="h4" sx={{ fontWeight: 700 }}>
@@ -238,37 +268,37 @@ export default function HomePage({ searchQuery, searchResults, onFilterApply }) 
             )}
           </Box>
         ) : searchQuery ? (
-              <SmartSearchResults
-                searchQuery={searchQuery}
-                results={searchResults}
-                onAddToCart={addToCart}
-                loading={false}
-              />
-            ) : (
-              localCategories.length === 0 ? (
-                <Box sx={{ textAlign: 'center', py: 8 }}>
-                  <Typography variant="h5" color="text.secondary">
-                    No categories found
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
-                    Please check your database connection and ensure categories are available.
-                  </Typography>
+          <SmartSearchResults
+            searchQuery={searchQuery}
+            results={searchResults}
+            onAddToCart={addToCart}
+            loading={false}
+          />
+        ) : (
+          localCategories.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 8 }}>
+              <Typography variant="h5" color="text.secondary">
+                No categories found
+              </Typography>
+              <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
+                Please check your database connection and ensure categories are available.
+              </Typography>
+            </Box>
+          ) : (
+            localCategories.map((cat, index) => (
+              <Fade in={true} timeout={600 + index * 200} key={cat.categoryID}>
+                <Box sx={{ mb: 6 }}>
+                  <ProductCarousel
+                    products={categoryProducts[cat.categoryID] || []}
+                    categoryName={cat.categoryName}
+                    onAddToCart={addToCart}
+                    onSeeAll={() => navigate(`/category/${cat.categoryID}`)}
+                  />
                 </Box>
-              ) : (
-                localCategories.map((cat, index) => (
-                  <Fade in={true} timeout={600 + index * 200} key={cat.categoryID}>
-                    <Box sx={{ mb: 6 }}>
-                      <ProductCarousel
-                        products={categoryProducts[cat.categoryID] || []}
-                        categoryName={cat.categoryName}
-                        onAddToCart={addToCart}
-                        onSeeAll={() => navigate(`/category/${cat.categoryID}`)}
-                      />
-                    </Box>
-                  </Fade>
-                ))
-              )
-            )}
+              </Fade>
+            ))
+          )
+        )}
 
       </Container>
     </Box>
