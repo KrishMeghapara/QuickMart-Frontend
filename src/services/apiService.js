@@ -58,6 +58,9 @@ class ApiService {
         // Handle 500 server errors
         if (response.status === 500) {
           console.error('Server error:', errorData.message || responseText);
+          if (errorData.inner) {
+            console.error('Inner exception:', errorData.inner);
+          }
           throw new Error(errorData.message || 'Server error. Please try again later.');
         }
 
