@@ -40,11 +40,56 @@ export const CarouselSkeleton = () => (
 );
 
 export const PageSkeleton = () => (
-  <Box sx={{ p: 3 }}>
-    <Skeleton variant="text" height={48} width="40%" sx={{ mb: 3 }} />
-    <CarouselSkeleton />
-    <CarouselSkeleton />
-    <CarouselSkeleton />
+  <Box sx={{
+    minHeight: '100vh',
+    width: '100%',
+    bgcolor: '#f8fafc',
+    overflow: 'hidden'
+  }}>
+    {/* Hero Section Skeleton */}
+    <Box sx={{
+      width: '100%',
+      height: { xs: 200, md: 280 },
+      bgcolor: '#e2e8f0',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      mb: 3
+    }}>
+      <Box sx={{ textAlign: 'center', width: '60%' }}>
+        <Skeleton variant="text" height={60} width="80%" sx={{ mx: 'auto', mb: 2 }} />
+        <Skeleton variant="text" height={30} width="50%" sx={{ mx: 'auto' }} />
+      </Box>
+    </Box>
+
+    {/* Category Nav Skeleton */}
+    <Box sx={{ px: 3, mb: 4 }}>
+      <Box sx={{ display: 'flex', gap: 2, overflowX: 'hidden' }}>
+        {[...Array(8)].map((_, index) => (
+          <Box key={index} sx={{ textAlign: 'center', minWidth: 80 }}>
+            <Skeleton variant="circular" width={64} height={64} sx={{ mx: 'auto', mb: 1 }} />
+            <Skeleton variant="text" height={16} width={60} sx={{ mx: 'auto' }} />
+          </Box>
+        ))}
+      </Box>
+    </Box>
+
+    {/* Trending Section Skeleton */}
+    <Box sx={{ px: 3, mb: 4 }}>
+      <Skeleton variant="text" height={36} width="25%" sx={{ mb: 2 }} />
+      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 2 }}>
+        {[...Array(4)].map((_, index) => (
+          <Skeleton key={index} variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
+        ))}
+      </Box>
+    </Box>
+
+    {/* Product Carousels Skeleton */}
+    <Box sx={{ px: 3 }}>
+      <CarouselSkeleton />
+      <CarouselSkeleton />
+      <CarouselSkeleton />
+    </Box>
   </Box>
 );
 

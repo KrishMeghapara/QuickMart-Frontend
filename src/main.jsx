@@ -8,9 +8,6 @@ import { AuthProvider } from './features/auth/AuthContext';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import 'leaflet/dist/leaflet.css';
 
-// Debug: Check if environment variable is loaded
-console.log('VITE_GOOGLE_CLIENT_ID:', import.meta.env.VITE_GOOGLE_CLIENT_ID);
-
 const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 if (!clientId) {

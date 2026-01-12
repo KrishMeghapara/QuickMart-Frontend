@@ -5,7 +5,7 @@ const API_CONFIG = {
   },
   production: {
     baseUrl: import.meta.env.VITE_API_URL || 'https://your-api-domain.com/api',
-    timeout: 15000
+    timeout: 60000 // 60 seconds for Render free tier cold starts
   }
 };
 
