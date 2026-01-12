@@ -9,7 +9,7 @@ class ApiService {
   async request(endpoint, options = {}) {
     const url = `${this.baseUrl}${endpoint}`;
     const token = localStorage.getItem('jwtToken');
-    
+
     const defaultOptions = {
       headers: {
         'Content-Type': 'application/json',
@@ -24,7 +24,7 @@ class ApiService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.timeout);
-      
+
       const response = await fetch(url, {
         ...config,
         signal: controller.signal
@@ -34,7 +34,7 @@ class ApiService {
 
       // Read response body once
       const responseText = await response.text();
-      
+
       if (!response.ok) {
         let errorData = {};
         try {
@@ -42,18 +42,31 @@ class ApiService {
         } catch {
           // Response is not JSON
         }
-        
-        // Handle 500 server errors (likely FluentValidation async issue)
-        if (response.status === 500) {
-          throw new Error('Server error. Please try again later or contact support.');
+
+        // Handle 401 Unauthorized - token expired or invalid
+        if (response.status === 401) {
+          console.log('Token expired or invalid. Clearing auth...');
+          localStorage.removeItem('jwtToken');
+          localStorage.removeItem('user');
+          // Only redirect if not already on login page
+          if (!window.location.pathname.includes('/login')) {
+            window.location.href = '/login';
+          }
+          throw new Error('Session expired. Please login again.');
         }
-        
+
+        // Handle 500 server errors
+        if (response.status === 500) {
+          console.error('Server error:', errorData.message || responseText);
+          throw new Error(errorData.message || 'Server error. Please try again later.');
+        }
+
         // Handle FluentValidation errors
         if (errorData.errors && Array.isArray(errorData.errors)) {
           const validationErrors = errorData.errors.map(err => `${err.field}: ${err.message}`).join(', ');
           throw new Error(`Validation failed: ${validationErrors}`);
         }
-        
+
         // Handle other API errors
         throw new Error(errorData.message || responseText || `HTTP ${response.status}: ${response.statusText}`);
       }
@@ -143,7 +156,7 @@ class ApiService {
     if (filters.inStockOnly) params.append('InStockOnly', filters.inStockOnly);
     if (filters.sortBy) params.append('SortBy', filters.sortBy);
     if (filters.search) params.append('Search', filters.search);
-    
+
     return this.request(`/Product/Filter?${params.toString()}`);
   }
 
@@ -233,10 +246,10 @@ class ApiService {
   async uploadProfilePicture(file) {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     const token = localStorage.getItem('jwtToken');
     const url = `${this.baseUrl}/User/UploadProfilePicture`;
-    
+
     const response = await fetch(url, {
       method: 'POST',
       headers: {
