@@ -40,13 +40,7 @@ export default function CartDrawer({ open, onClose }) {
   const remainingForFreeDelivery = Math.max(0, freeDeliveryThreshold - total);
   const deliveryFee = total >= freeDeliveryThreshold ? 0 : 29;
 
-  // Suggested items for cart optimization
-  const suggestedItems = [
-    { id: 1, name: 'Milk - Amul Gold', price: 65, emoji: '🥛', reason: 'Often bought together' },
-    { id: 2, name: 'Bread - Britannia', price: 25, emoji: '🍞', reason: 'Complete your breakfast' },
-    { id: 3, name: 'Eggs - Farm Fresh', price: 84, emoji: '🥚', reason: 'Popular combo' },
-    { id: 4, name: 'Bananas - Organic', price: 48, emoji: '🍌', reason: 'Healthy addition' }
-  ];
+
 
   const saveForLater = (item) => {
     setSavedForLater(prev => [...prev, item]);
@@ -330,64 +324,7 @@ export default function CartDrawer({ open, onClose }) {
           ))}
         </List>
 
-        {/* Suggested Items Section */}
-        {cart.length > 0 && (
-          <>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: 'var(--text)', mb: 2 }}>
-                🛒 Frequently bought together
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', pb: 1 }}>
-                {suggestedItems.slice(0, 3).map((item) => (
-                  <Box
-                    key={item.id}
-                    sx={{
-                      minWidth: 120,
-                      p: 1.5,
-                      bgcolor: 'rgba(16, 185, 129, 0.05)',
-                      borderRadius: 2,
-                      border: '1px solid rgba(16, 185, 129, 0.2)',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        bgcolor: 'rgba(16, 185, 129, 0.1)',
-                        borderColor: 'rgba(16, 185, 129, 0.3)',
-                        transform: 'translateY(-2px)'
-                      }
-                    }}
-                  >
-                    <Box sx={{ textAlign: 'center', mb: 1, fontSize: '1.2rem' }}>
-                      {item.emoji}
-                    </Box>
-                    <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#111827', mb: 0.5, textAlign: 'center' }}>
-                      {item.name.split(' - ')[0]}
-                    </Typography>
-                    <Typography sx={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 600, textAlign: 'center', mb: 1 }}>
-                      ₹{item.price}
-                    </Typography>
-                    <Button
-                      size="small"
-                      fullWidth
-                      sx={{
-                        bgcolor: '#10b981',
-                        color: 'white',
-                        fontSize: '0.7rem',
-                        py: 0.5,
-                        '&:hover': { bgcolor: '#059669' }
-                      }}
-                    >
-                      ADD
-                    </Button>
-                  </Box>
-                ))}
-              </Box>
-              <Typography variant="caption" sx={{ color: '#6b7280', mt: 1, display: 'block' }}>
-                💡 {suggestedItems[0].reason}
-              </Typography>
-            </Box>
-            <Divider sx={{ my: 2 }} />
-          </>
-        )}
+
 
         {/* Free Delivery Progress */}
         {remainingForFreeDelivery > 0 && cart.length > 0 && (

@@ -63,7 +63,7 @@ import { API_BASE } from '../config/api';
 const API_BASE_URL = API_BASE;
 
 export default function UserProfile() {
-  const { user, token, updateUser } = useAuth();
+  const { user, token, updateUser, logout } = useAuth();
   const { cart } = useCart();
   const [addresses, setAddresses] = useState([]);
   const [defaultAddressId, setDefaultAddressId] = useState(null);
