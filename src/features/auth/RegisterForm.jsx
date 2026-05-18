@@ -35,6 +35,7 @@ import {
   Star
 } from '@mui/icons-material';
 import GoogleLoginButton from './GoogleLoginButton';
+import { useNavigate } from 'react-router-dom';
 import apiService from '../../services/apiService';
 
 const RegisterForm = ({ onRegister }) => {
@@ -47,6 +48,7 @@ const RegisterForm = ({ onRegister }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
   // Validation states
   const [userNameError, setUserNameError] = useState('');
@@ -200,7 +202,7 @@ const RegisterForm = ({ onRegister }) => {
     <Container maxWidth="lg">
       <Grid container spacing={4} alignItems="center">
         {/* Left Side - Quick Commerce Brand */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Fade in={true} timeout={800}>
             <Box sx={{ textAlign: { xs: 'center', md: 'left' }, mb: { xs: 4, md: 0 } }}>
               {/* Brand Section */}
@@ -266,7 +268,7 @@ const RegisterForm = ({ onRegister }) => {
         </Grid>
 
         {/* Right Side - Register Form */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Fade in={true} timeout={1000}>
             <Card sx={{ 
               maxWidth: 480, 
@@ -510,7 +512,7 @@ const RegisterForm = ({ onRegister }) => {
                       Already have an account?{' '}
                       <Button 
                         variant="text" 
-                        onClick={() => window.location.href = '/login'}
+                        onClick={() => navigate('/login')}
                         sx={{ 
                           color: '#10b981',
                           fontWeight: 600,

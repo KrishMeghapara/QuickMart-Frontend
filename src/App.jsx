@@ -18,14 +18,14 @@ import { useCart } from "./features/cart/CartContext";
 import CartDrawer from "./features/cart/CartDrawer";
 import ProductGrid from "./features/products/ProductGrid";
 import AddAddressForm from "./features/user/AddAddressForm";
-import ProfilePictureTest from "./features/user/ProfilePictureTest";
+
 
 // Layouts
 import Header from "./layouts/Header";
 
 // Components
 import ToastProvider from "./components/common/ToastProvider";
-import ApiTest from "./components/ui/ApiTest";
+
 
 // Services
 import apiService from "./services/apiService";
@@ -96,7 +96,7 @@ function MainApp() {
         const cats = await apiService.getCategories();
         setCategories(cats);
       } catch (error) {
-        console.error('Failed to load categories:', error);
+        // Categories failed to load
       }
     };
     loadCategories();
@@ -124,7 +124,6 @@ function MainApp() {
       const results = await apiService.searchProducts(query.trim());
       setSearchResults(results);
     } catch (error) {
-      console.error('Search failed:', error);
       setSearchResults([]);
     } finally {
       setIsSearching(false);
@@ -133,11 +132,9 @@ function MainApp() {
 
   const handleFilterApply = async (filters) => {
     try {
-      const products = await apiService.filterProducts(filters);
-      // Pass filtered products to HomePage somehow
-      console.log('Filtered products:', products);
+      await apiService.filterProducts(filters);
     } catch (error) {
-      console.error('Filter failed:', error);
+      // Filter failed silently
     }
   };
 
@@ -159,7 +156,7 @@ function MainApp() {
         <Route path="/product/:productId" element={<ProductDetailPage />} />
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/payment" element={<PaymentPage />} />
-        <Route path="/profile-picture-test" element={<ProfilePictureTest />} />
+
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />

@@ -55,13 +55,10 @@ export function CartProvider({ children }) {
 
     try {
       dispatch({ type: "SET_LOADING", loading: true });
-      // Small delay to ensure token is properly set
       await new Promise(resolve => setTimeout(resolve, 100));
       const cartData = await apiService.getMyCart();
       dispatch({ type: "SET_CART", items: cartData });
     } catch (error) {
-      console.error('Error loading cart:', error);
-      // Don't show error immediately after login, retry once
       setTimeout(() => {
         if (token && user) {
           loadCart();
@@ -80,38 +77,33 @@ export function CartProvider({ children }) {
     }
   }, [token, user, loadCart]);
 
-  // Auto-refresh cart every 2 seconds (except on payment page)
+  // Auto-refresh cart periodically (except on payment page)
   useEffect(() => {
     if (!token || !user) return;
 
-    // Don't auto-refresh on payment page
     if (window.location.pathname === '/payment') return;
 
     const interval = setInterval(async () => {
       try {
-        // Don't refresh if user is on payment page
         if (window.location.pathname === '/payment') return;
 
         const cartData = await apiService.getMyCart();
         dispatch({ type: "SET_CART", items: cartData });
       } catch (error) {
-        console.error('Auto-refresh failed:', error);
+        // Silently fail on auto-refresh
       }
-    }, 2000); // 2 seconds
+    }, 30000); // 30 seconds
 
     return () => clearInterval(interval);
   }, [token, user]);
 
   const addToCart = async (product) => {
     if (!token) {
-      // Show alert and redirect to login
       alert('Please login to add items to cart');
-      window.location.href = '/login';
       return false;
     }
 
     if (!product) {
-      console.error('addToCart: No product provided');
       dispatch({ type: "SET_ERROR", error: 'Invalid product' });
       return false;
     }
@@ -119,11 +111,9 @@ export function CartProvider({ children }) {
     try {
       dispatch({ type: "SET_LOADING", loading: true });
 
-      // Handle both ProductID and productID casing
       const productId = product.productID || product.ProductID;
 
       if (!productId) {
-        console.error('addToCart: Product has no ID', product);
         dispatch({ type: "SET_ERROR", error: 'Product ID not found' });
         return false;
       }
@@ -133,18 +123,13 @@ export function CartProvider({ children }) {
         Quantity: 1
       };
 
-      console.log('Adding to cart:', cartItem);
       await apiService.addToCart(cartItem);
-
-      // Reload cart to get updated data
       await loadCart();
 
-      // Notify UI listeners (e.g., open cart drawer)
       window.dispatchEvent(new CustomEvent('cart:itemAdded'));
 
       return true;
     } catch (error) {
-      console.error('Error adding to cart:', error);
       dispatch({ type: "SET_ERROR", error: error.message || 'Failed to add item to cart' });
       dispatch({ type: "SET_LOADING", loading: false });
       return false;
@@ -166,13 +151,9 @@ export function CartProvider({ children }) {
       };
 
       await apiService.updateCartQuantity(updateData);
-
-      // Update local state immediately for better UX
       dispatch({ type: "UPDATE_QUANTITY", cartID, quantity });
     } catch (error) {
-      console.error('Error updating quantity:', error);
       dispatch({ type: "SET_ERROR", error: 'Failed to update quantity' });
-      // Reload cart to sync with server
       await loadCart();
     }
   };
@@ -185,15 +166,10 @@ export function CartProvider({ children }) {
 
     try {
       dispatch({ type: "SET_LOADING", loading: true });
-
       await apiService.removeFromCart(cartID);
-
-      // Update local state immediately for better UX
       dispatch({ type: "REMOVE", cartID });
     } catch (error) {
-      console.error('Error removing from cart:', error);
       dispatch({ type: "SET_ERROR", error: 'Failed to remove item from cart' });
-      // Reload cart to sync with server
       await loadCart();
     }
   };
@@ -206,17 +182,12 @@ export function CartProvider({ children }) {
 
     try {
       dispatch({ type: "SET_LOADING", loading: true });
-
-      // Remove all items one by one (or implement a bulk delete API)
       for (const item of state.items) {
         await apiService.removeFromCart(item.cartID);
       }
-
       dispatch({ type: "CLEAR" });
     } catch (error) {
-      console.error('Error clearing cart:', error);
       dispatch({ type: "SET_ERROR", error: 'Failed to clear cart' });
-      // Reload cart to sync with server
       await loadCart();
     }
   };

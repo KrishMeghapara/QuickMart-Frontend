@@ -33,7 +33,7 @@ export default function ModernHero() {
     }}>
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <Grid container alignItems="center" spacing={6}>
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Typography variant="h1" sx={{ 
               fontFamily: 'Poppins, sans-serif',
               fontWeight: 700,
@@ -122,7 +122,7 @@ export default function ModernHero() {
                 { emoji: '🏪', title: '10,000+ Products', desc: 'Everything you need' },
                 { emoji: '📍', title: 'Hyperlocal', desc: 'Serving your area' }
               ].map((feature, idx) => (
-                <Grid item xs={6} key={idx}>
+                <Grid size={{ xs: 6 }} key={idx}>
                   <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
                     <Box sx={{ fontSize: '1.75rem', lineHeight: 1 }}>{feature.emoji}</Box>
                     <Box>
@@ -138,7 +138,7 @@ export default function ModernHero() {
               ))}
             </Grid>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Box sx={{ position: 'relative', height: '400px' }}>
               {[...Array(3)].map((_, i) => (
                 <Box

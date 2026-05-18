@@ -46,7 +46,6 @@ import { useCart } from '../features/cart/CartContext';
 import { useAuth } from '../features/auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import apiService from '../services/apiService';
-import { API_BASE } from '../config/api';
 import './PaymentPage.css';
 
 const steps = ['Order Review', 'Shipping Details', 'Payment Method', 'Confirmation'];
@@ -123,38 +122,23 @@ export default function PaymentPage() {
   const fetchUserAddress = async () => {
     try {
       setIsLoadingAddress(true);
-      const response = await fetch(`${API_BASE}/Address/GetForCurrentUser`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
-          'Content-Type': 'application/json'
-        }
+      const addressData = await apiService.getMyAddress();
+      setShippingDetails({
+        fullName: user?.UserName || '',
+        phone: addressData.phone || '',
+        address: `${addressData.house || ''} ${addressData.street || ''} ${addressData.landmark || ''}`.trim(),
+        city: addressData.city || '',
+        state: addressData.state || '',
+        pincode: addressData.pincode || ''
       });
-
-      if (response.ok) {
-        const addressData = await response.json();
-        // Auto-populate shipping details from user's address
-        setShippingDetails({
-          fullName: user?.UserName || '',
-          phone: addressData.phone || '',
-          address: `${addressData.house || ''} ${addressData.street || ''} ${addressData.landmark || ''}`.trim(),
-          city: addressData.city || '',
-          state: addressData.state || '',
-          pincode: addressData.pincode || ''
-        });
-        setAddressFilled(true);
-        // Auto-hide success message after 3 seconds
-        setTimeout(() => setAddressFilled(false), 3000);
-      } else if (response.status === 404) {
-        // No address found - keep default values
-        console.log('No address found for user');
+      setAddressFilled(true);
+      setTimeout(() => setAddressFilled(false), 3000);
+    } catch (error) {
+      if (error.message?.includes('404')) {
         setError('No saved address found. Please fill in your shipping details manually.');
       } else {
-        console.error('Failed to fetch address:', response.status);
         setError('Failed to load your saved address. Please fill in details manually.');
       }
-    } catch (error) {
-      console.error('Error fetching user address:', error);
-      setError('Failed to load your saved address. Please fill in details manually.');
     } finally {
       setIsLoadingAddress(false);
     }
@@ -333,7 +317,7 @@ export default function PaymentPage() {
       <Card sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
         <CardContent>
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 label="Full Name"
@@ -350,7 +334,7 @@ export default function PaymentPage() {
                 }}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 label="Phone Number"
@@ -367,7 +351,7 @@ export default function PaymentPage() {
                 }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label="Address"
@@ -386,7 +370,7 @@ export default function PaymentPage() {
                 }}
               />
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <TextField
                 fullWidth
                 label="City"
@@ -403,7 +387,7 @@ export default function PaymentPage() {
                 }}
               />
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <TextField
                 fullWidth
                 label="State"
@@ -420,7 +404,7 @@ export default function PaymentPage() {
                 }}
               />
             </Grid>
-            <Grid item xs={12} sm={4}>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <TextField
                 fullWidth
                 label="Pincode"

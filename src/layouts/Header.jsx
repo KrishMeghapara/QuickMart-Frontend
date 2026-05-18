@@ -192,7 +192,6 @@ export default function Header({ onCartClick, onSearch, onFilterApply, categorie
     setFilters(prev => ({ ...prev, [key]: value }));
   };
   const applyFilters = () => {
-    console.log('Applying filters:', filters);
     onFilterApply?.(filters);
     closeFilterMenu();
   };
@@ -220,9 +219,11 @@ export default function Header({ onCartClick, onSearch, onFilterApply, categorie
       <Toolbar sx={{
         justifyContent: 'space-between',
         py: { xs: 1, sm: 1.5 },
-        px: { xs: 1, sm: 2, md: 4 },
+        px: { xs: 1.5, sm: 2, md: 4 },
         minHeight: { xs: '56px', sm: '64px' },
-        flexWrap: { xs: 'wrap', md: 'nowrap' }
+        flexWrap: { xs: 'wrap', md: 'nowrap' },
+        gap: { xs: 1, md: 0 },
+        alignItems: 'center'
       }}>
         {/* Logo */}
         <LogoContainer onClick={() => navigate('/')}>

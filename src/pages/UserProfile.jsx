@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  Container,
-  Paper,
   Typography,
   TextField,
   Button,
@@ -11,19 +9,10 @@ import {
   CardContent,
   Alert,
   CircularProgress,
-  Divider,
   Avatar,
   Chip,
-  Tabs,
-  Tab,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
   IconButton,
-  Badge,
   Fade,
-  LinearProgress,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -36,35 +25,28 @@ import {
   Save as SaveIcon,
   Add as AddIcon,
   Delete as DeleteIcon,
-  ShoppingBag as OrderIcon,
   ShoppingBag as ShoppingBagIcon,
   Settings as SettingsIcon,
   Security as SecurityIcon,
-  Notifications as NotificationsIcon,
-  LocalShipping as ShippingIcon,
-  Payment as PaymentIcon,
   Star as StarIcon,
-  CalendarToday as DateIcon,
-  AttachMoney as PriceIcon,
   CheckCircle as CheckIcon,
-  Cancel as CancelIcon,
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
   Logout as LogoutIcon
 } from '@mui/icons-material';
 import { useAuth } from '../features/auth/AuthContext';
 import { useCart } from '../features/cart/CartContext';
+import { useNavigate } from 'react-router-dom';
+import { API_BASE } from '../config/api';
 import './UserProfile.css';
 import AddAddressForm from '../features/user/AddAddressForm';
 import ProfilePictureUpload from '../features/user/ProfilePictureUpload';
 import apiService from '../services/apiService';
-import { API_BASE } from '../config/api';
-
-const API_BASE_URL = API_BASE;
 
 export default function UserProfile() {
   const { user, token, updateUser, logout } = useAuth();
   const { cart } = useCart();
+  const navigate = useNavigate();
   const [addresses, setAddresses] = useState([]);
   const [defaultAddressId, setDefaultAddressId] = useState(null);
   const [orders, setOrders] = useState([]);
@@ -82,7 +64,7 @@ export default function UserProfile() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [useCurrentLocation, setUseCurrentLocation] = useState(false);
+
 
   const [formData, setFormData] = useState({
     house: '',
@@ -113,30 +95,10 @@ export default function UserProfile() {
         fetchUserProfile()
       ]);
 
-      // Handle address response
-      if (addressResponse.status === 'fulfilled') {
-        // Address is already set in fetchUserAddress
-      } else {
-        console.error('Failed to fetch address:', addressResponse.reason);
-      }
-
-      // Handle orders response
-      if (ordersResponse.status === 'fulfilled') {
-        // Orders are already set in fetchUserOrders
-      } else {
-        console.error('Failed to fetch orders:', ordersResponse.reason);
-      }
-
-      // Handle profile response
-      if (profileResponse.status === 'fulfilled') {
-        // Profile is already updated in fetchUserProfile
-      } else {
-        console.error('Failed to fetch profile:', profileResponse.reason);
-      }
+      // Results are handled inside each fetch function
 
     } catch (error) {
       setError('Failed to load user data');
-      console.error('Error fetching user data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -144,71 +106,42 @@ export default function UserProfile() {
 
   const fetchUserAddress = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/Address/GetForCurrentUser`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const addressData = await apiService.getMyAddress();
 
-      if (response.ok) {
-        const addressData = await response.json();
-        console.log('Fetched address data:', addressData);
-
-        // Handle single address (convert to array for consistency)
-        if (addressData && !Array.isArray(addressData)) {
-          const addressArray = [{
-            ...addressData,
-            addressType: addressData.addressType || 'Home',
-            label: addressData.label || 'Primary Address',
-            isDefault: true
-          }];
-          setAddresses(addressArray);
-          setDefaultAddressId(addressData.AddressID || addressData.addressID);
-        } else if (Array.isArray(addressData)) {
-          setAddresses(addressData);
-          const defaultAddr = addressData.find(addr => addr.isDefault);
-          if (defaultAddr) {
-            setDefaultAddressId(defaultAddr.AddressID || defaultAddr.addressID);
-          }
-        } else {
-          setAddresses([]);
+      if (addressData && !Array.isArray(addressData)) {
+        const addressArray = [{
+          ...addressData,
+          addressType: addressData.addressType || 'Home',
+          label: addressData.label || 'Primary Address',
+          isDefault: true
+        }];
+        setAddresses(addressArray);
+        setDefaultAddressId(addressData.AddressID || addressData.addressID);
+      } else if (Array.isArray(addressData)) {
+        setAddresses(addressData);
+        const defaultAddr = addressData.find(addr => addr.isDefault);
+        if (defaultAddr) {
+          setDefaultAddressId(defaultAddr.AddressID || defaultAddr.addressID);
         }
-      } else if (response.status === 404) {
-        setAddresses([]);
       } else {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to fetch address');
+        setAddresses([]);
       }
     } catch (error) {
-      console.error('Error fetching address:', error);
-      setAddresses([]);
-      throw error;
+      if (error.message?.includes('404')) {
+        setAddresses([]);
+      } else {
+        setAddresses([]);
+        throw error;
+      }
     }
   };
 
   const fetchUserOrders = async () => {
     try {
       if (!user?.UserID) return;
-
-      const response = await fetch(`${API_BASE_URL}/Order/User/${user.UserID}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        const ordersData = await response.json();
-        setOrders(ordersData);
-      } else if (response.status === 404) {
-        setOrders([]);
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to fetch orders');
-      }
+      const ordersData = await apiService.getOrdersByUser(user.UserID);
+      setOrders(ordersData);
     } catch (error) {
-      console.error('Error fetching orders:', error);
       setOrders([]);
       throw error;
     }
@@ -216,20 +149,10 @@ export default function UserProfile() {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/User/Profile`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        const profileData = await response.json();
-        // Update the user context with fresh profile data
-        updateUser(profileData);
-      }
+      const profileData = await apiService.getUserProfile();
+      updateUser(profileData);
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      // Silently fail on profile fetch
     }
   };
 
@@ -246,24 +169,11 @@ export default function UserProfile() {
       setIsSaving(true);
       setError('');
 
-      const response = await fetch(`${API_BASE_URL}/Address/UpdateForCurrentUser`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
-
-      if (response.ok) {
-        setSuccess('Address updated successfully!');
-        setIsEditing(false);
-        await fetchUserAddress(); // Refresh data
-        setTimeout(() => setSuccess(''), 3000);
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to update address');
-      }
+      await apiService.updateMyAddress(formData);
+      setSuccess('Address updated successfully!');
+      setEditingAddressId(null);
+      await fetchUserAddress();
+      setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
       setError(error.message || 'Failed to update address');
     } finally {
@@ -286,30 +196,13 @@ export default function UserProfile() {
       setIsSaving(true);
       setError('');
 
-      // Call API to change password
-      const response = await fetch(`${API_BASE_URL}/User/ChangePassword`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          currentPassword,
-          newPassword
-        })
-      });
-
-      if (response.ok) {
-        setSuccess('Password changed successfully!');
-        setShowPasswordDialog(false);
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
-        setTimeout(() => setSuccess(''), 3000);
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to change password');
-      }
+      await apiService.changePassword({ currentPassword, newPassword });
+      setSuccess('Password changed successfully!');
+      setShowPasswordDialog(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
       setError(error.message || 'Failed to change password');
     } finally {
@@ -317,55 +210,13 @@ export default function UserProfile() {
     }
   };
 
-  const handleSetDefaultAddress = async (addressId) => {
-    try {
-      setIsSaving(true);
-      // API call to set default address
-      // For now, just update locally
-      setDefaultAddressId(addressId);
-      setSuccess('Default address updated!');
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (error) {
-      setError('Failed to set default address');
-    } finally {
-      setIsSaving(false);
-    }
+  const handleSetDefaultAddress = (addressId) => {
+    setDefaultAddressId(addressId);
+    setSuccess('Default address updated!');
+    setTimeout(() => setSuccess(''), 3000);
   };
 
-  const handleGetCurrentLocation = () => {
-    if (navigator.geolocation) {
-      setUseCurrentLocation(true);
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            // Use reverse geocoding to get address from coordinates
-            const { latitude, longitude } = position.coords;
 
-            // For demo purposes, set approximate location
-            setFormData(prev => ({
-              ...prev,
-              city: 'Rajkot',
-              state: 'Gujarat',
-              pincode: '360001'
-            }));
-
-            setSuccess('Location detected! Please complete the address details.');
-            setTimeout(() => setSuccess(''), 3000);
-          } catch (error) {
-            setError('Failed to get address from location');
-          } finally {
-            setUseCurrentLocation(false);
-          }
-        },
-        (error) => {
-          setError('Failed to get your location. Please enter manually.');
-          setUseCurrentLocation(false);
-        }
-      );
-    } else {
-      setError('Geolocation is not supported by your browser');
-    }
-  };
 
   const handleEditAddress = (address) => {
     setEditingAddressId(address.AddressID || address.addressID);
@@ -412,7 +263,6 @@ export default function UserProfile() {
       setAddressToDelete(null);
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
-      console.error('Delete address error:', error);
       setError(error.message || 'Failed to delete address.');
     } finally {
       setIsSaving(false);
@@ -427,33 +277,7 @@ export default function UserProfile() {
     }, 500);
   };
 
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'delivered': return 'success';
-      case 'shipped': return 'info';
-      case 'processing': return 'warning';
-      case 'cancelled': return 'error';
-      default: return 'default';
-    }
-  };
 
-  const getStatusIcon = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'delivered': return <CheckIcon />;
-      case 'shipped': return <ShippingIcon />;
-      case 'processing': return <CircularProgress size={16} />;
-      case 'cancelled': return <CancelIcon />;
-      default: return <OrderIcon />;
-    }
-  };
-
-  const formatOrderDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
 
   if (isLoading) {
     return (
@@ -463,7 +287,7 @@ export default function UserProfile() {
         alignItems: 'center',
         minHeight: '60vh'
       }}>
-        <CircularProgress size={60} sx={{ color: '#667eea' }} />
+        <CircularProgress size={60} sx={{ color: '#10b981' }} />
       </Box>
     );
   }
@@ -488,34 +312,17 @@ export default function UserProfile() {
     }}>
       {/* Header */}
       <Box sx={{ mb: { xs: 3, md: 4 } }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-          <Typography sx={{
-            fontSize: { xs: '2.25rem', md: '3.5rem' },
-            fontWeight: 800,
-            background: 'linear-gradient(45deg, #10b981 0%, #059669 100%)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            letterSpacing: '-0.5px',
-            lineHeight: 1
-          }}>
-            My Profile
-          </Typography>
-          <Chip
-            label="⚡ Quick Commerce"
-            size="small"
-            sx={{
-              background: 'linear-gradient(135deg, #10b981, #059669)',
-              color: 'white',
-              fontWeight: 600,
-              fontSize: '0.75rem',
-              height: '24px',
-              boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
-            }}
-          />
-        </Box>
-        <Typography variant="body1" color="text.secondary" sx={{ fontSize: '0.95rem', mb: 0 }}>
-          Manage your account and get groceries in 12 minutes
+        <Typography sx={{
+          fontSize: { xs: '2rem', md: '2.5rem' },
+          fontWeight: 700,
+          color: 'var(--text)',
+          letterSpacing: '-0.5px',
+          lineHeight: 1
+        }}>
+          My Profile
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ fontSize: '0.95rem', mt: 1 }}>
+          Manage your account settings and addresses
         </Typography>
       </Box>
 
@@ -540,7 +347,7 @@ export default function UserProfile() {
         }
       }}>
         {/* Left Column - Profile Info */}
-        <Grid item xs={12} md={5} lg={4} sx={{ minWidth: '320px' }}>
+        <Grid size={{ xs: 12, md: 5, lg: 4 }} sx={{ minWidth: '320px' }}>
           <Fade in={true} timeout={600}>
             <Card sx={{
               borderRadius: '24px',
@@ -569,7 +376,7 @@ export default function UserProfile() {
                     {(user?.profilePicture || user?.googlePicture) ? (
                       <img
                         src={user?.profilePicture ?
-                          (user.profilePicture.startsWith('http') ? user.profilePicture : `${API_BASE_URL.replace('/api', '')}${user.profilePicture}`)
+                          (user.profilePicture.startsWith('http') ? user.profilePicture : `${API_BASE.replace('/api', '')}${user.profilePicture}`)
                           : user?.googlePicture}
                         alt={user?.UserName || 'User Avatar'}
                         style={{
@@ -653,7 +460,7 @@ export default function UserProfile() {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3, gap: 3 }}>
                   <Box sx={{ textAlign: 'center' }}>
                     <Box sx={{ mb: 1 }}>
-                      <OrderIcon sx={{ fontSize: 24, color: orders.length > 0 ? '#10b981' : 'var(--muted)', mb: 0.5 }} />
+                      <ShoppingBagIcon sx={{ fontSize: 24, color: orders.length > 0 ? '#10b981' : 'var(--muted)', mb: 0.5 }} />
                     </Box>
                     <Typography variant="h6" sx={{
                       fontWeight: 700,
@@ -757,7 +564,7 @@ export default function UserProfile() {
         </Grid>
 
         {/* Right Column - Content */}
-        <Grid item xs={12} md={7} lg={8} sx={{ minWidth: { md: '760px' } }}>
+        <Grid size={{ xs: 12, md: 7, lg: 8 }} sx={{ minWidth: { md: '760px' } }}>
           <Fade in={true} timeout={1000}>
             <Card sx={{
               borderRadius: '20px',
@@ -829,7 +636,7 @@ export default function UserProfile() {
                       />
 
                       <Grid container spacing={3}>
-                        <Grid item xs={12} sm={6}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
                           <TextField
                             fullWidth
                             label="Full Name"
@@ -838,7 +645,7 @@ export default function UserProfile() {
                             sx={{ mb: 2 }}
                           />
                         </Grid>
-                        <Grid item xs={12} sm={6}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
                           <TextField
                             fullWidth
                             label="Email"
@@ -847,24 +654,14 @@ export default function UserProfile() {
                             sx={{ mb: 2 }}
                           />
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }}>
                           <Typography variant="body2" color="text.secondary">
                             {user?.isGoogleUser
                               ? 'Profile information is managed through your Google account.'
                               : 'Contact support to update your profile information.'
                             }
                           </Typography>
-                          {process.env.NODE_ENV === 'development' && (
-                            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block', fontSize: '0.7rem' }}>
-                              Debug: {JSON.stringify({
-                                userName: user?.userName,
-                                UserName: user?.UserName,
-                                email: user?.email,
-                                Email: user?.Email,
-                                isGoogleUser: user?.isGoogleUser
-                              }, null, 2)}
-                            </Typography>
-                          )}
+
                         </Grid>
                       </Grid>
                     </Box>
@@ -906,7 +703,7 @@ export default function UserProfile() {
                             const isEditing = addressId === editingAddressId;
 
                             return (
-                              <Grid item xs={12} key={addressId}>
+                              <Grid size={{ xs: 12 }} key={addressId}>
                                 <Fade in={true} timeout={400}>
                                   <Card sx={{
                                     border: isDefault ? '2px solid #10b981' : '1px solid #e0e0e0',
@@ -947,17 +744,7 @@ export default function UserProfile() {
                                                 }}
                                               />
                                             )}
-                                            <Chip
-                                              label="⚡ 12 mins"
-                                              size="small"
-                                              sx={{
-                                                background: 'rgba(16, 185, 129, 0.1)',
-                                                color: '#10b981',
-                                                fontWeight: 600,
-                                                fontSize: '0.7rem',
-                                                border: '1px solid rgba(16, 185, 129, 0.2)'
-                                              }}
-                                            />
+
                                           </Box>
 
                                           {!isEditing ? (
@@ -976,7 +763,7 @@ export default function UserProfile() {
                                           ) : (
                                             <Box sx={{ mt: 2 }}>
                                               <Grid container spacing={2}>
-                                                <Grid item xs={12} sm={6}>
+                                                <Grid size={{ xs: 12, sm: 6 }}>
                                                   <TextField
                                                     fullWidth
                                                     label="House/Flat No."
@@ -986,7 +773,7 @@ export default function UserProfile() {
                                                     size="small"
                                                   />
                                                 </Grid>
-                                                <Grid item xs={12} sm={6}>
+                                                <Grid size={{ xs: 12, sm: 6 }}>
                                                   <TextField
                                                     fullWidth
                                                     label="Street"
@@ -996,7 +783,7 @@ export default function UserProfile() {
                                                     size="small"
                                                   />
                                                 </Grid>
-                                                <Grid item xs={12}>
+                                                <Grid size={{ xs: 12 }}>
                                                   <TextField
                                                     fullWidth
                                                     label="Landmark"
@@ -1006,7 +793,7 @@ export default function UserProfile() {
                                                     size="small"
                                                   />
                                                 </Grid>
-                                                <Grid item xs={12} sm={4}>
+                                                <Grid size={{ xs: 12, sm: 4 }}>
                                                   <TextField
                                                     fullWidth
                                                     label="City"
@@ -1016,7 +803,7 @@ export default function UserProfile() {
                                                     size="small"
                                                   />
                                                 </Grid>
-                                                <Grid item xs={12} sm={4}>
+                                                <Grid size={{ xs: 12, sm: 4 }}>
                                                   <TextField
                                                     fullWidth
                                                     label="State"
@@ -1026,7 +813,7 @@ export default function UserProfile() {
                                                     size="small"
                                                   />
                                                 </Grid>
-                                                <Grid item xs={12} sm={4}>
+                                                <Grid size={{ xs: 12, sm: 4 }}>
                                                   <TextField
                                                     fullWidth
                                                     label="Pincode"
@@ -1036,7 +823,7 @@ export default function UserProfile() {
                                                     size="small"
                                                   />
                                                 </Grid>
-                                                <Grid item xs={12}>
+                                                <Grid size={{ xs: 12 }}>
                                                   <TextField
                                                     fullWidth
                                                     label="Phone"
@@ -1245,154 +1032,6 @@ export default function UserProfile() {
                     </Box>
                   )}
 
-                  {/* Orders Tab */}
-                  {activeTab === 2 && (
-                    <Box>
-                      <Typography variant="h5" sx={{ mb: 3, fontWeight: 700, color: '#111827' }}>
-                        Order History
-                      </Typography>
-                      {orders.length > 0 ? (
-                        <List sx={{ p: 0 }}>
-                          {orders.map((order, index) => (
-                            <Card key={order.orderID} sx={{
-                              mb: 2,
-                              border: '1px solid #e0e0e0',
-                              borderRadius: 4,
-                              boxShadow: '0 2px 12px rgba(0, 0, 0, 0.05)',
-                              background: 'rgba(255, 255, 255, 0.9)'
-                            }}>
-                              <CardContent sx={{ p: 3 }}>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                                  <Box>
-                                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                                      Order #{order.orderID}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                      {formatOrderDate(order.orderDate)}
-                                    </Typography>
-                                  </Box>
-                                  <Box sx={{ textAlign: 'right' }}>
-                                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                                      ${order.totalAmount}
-                                    </Typography>
-                                  </Box>
-                                </Box>
-                                <Divider sx={{ my: 2 }} />
-                                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                  {order.items?.length || 0} item{(order.items?.length || 0) > 1 ? 's' : ''}
-                                </Typography>
-                                {order.items && order.items.length > 0 && (
-                                  <Box sx={{ mb: 2 }}>
-                                    {order.items.map((item, itemIndex) => (
-                                      <Box key={itemIndex} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                        <Typography variant="body2">
-                                          {item.product?.productName || 'Product'} x {item.quantity}
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary">
-                                          ${item.priceAtTime}
-                                        </Typography>
-                                      </Box>
-                                    ))}
-                                  </Box>
-                                )}
-                                <Box sx={{ mt: 2 }}>
-                                  <Button
-                                    variant="contained"
-                                    size="small"
-                                    sx={{
-                                      mr: 1,
-                                      background: 'linear-gradient(135deg, #10b981, #059669)',
-                                      borderRadius: 2,
-                                      textTransform: 'none',
-                                      fontWeight: 600,
-                                      '&:hover': {
-                                        background: 'linear-gradient(135deg, #059669, #047857)',
-                                        transform: 'translateY(-1px)',
-                                        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
-                                      }
-                                    }}
-                                  >
-                                    View Details
-                                  </Button>
-                                  <Button
-                                    variant="outlined"
-                                    size="small"
-                                    sx={{
-                                      borderColor: '#10b981',
-                                      color: '#10b981',
-                                      borderRadius: 2,
-                                      textTransform: 'none',
-                                      fontWeight: 600,
-                                      '&:hover': {
-                                        borderColor: '#059669',
-                                        color: '#059669',
-                                        background: 'rgba(16, 185, 129, 0.05)'
-                                      }
-                                    }}
-                                  >
-                                    Track Order
-                                  </Button>
-                                </Box>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </List>
-                      ) : (
-                        <Box sx={{
-                          textAlign: 'center',
-                          py: 8,
-                          border: '2px dashed rgba(16, 185, 129, 0.3)',
-                          borderRadius: 4,
-                          background: 'linear-gradient(180deg, rgba(236, 253, 245, 0.6), rgba(255, 255, 255, 0.8))'
-                        }}>
-                          <Box sx={{
-                            width: 80,
-                            height: 80,
-                            borderRadius: '50%',
-                            background: 'rgba(16, 185, 129, 0.1)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            mx: 'auto',
-                            mb: 3,
-                            animation: 'pulse 2s infinite',
-                            '@keyframes pulse': {
-                              '0%, 100%': { transform: 'scale(1)', opacity: 1 },
-                              '50%': { transform: 'scale(1.05)', opacity: 0.8 }
-                            }
-                          }}>
-                            <OrderIcon sx={{ fontSize: 40, color: '#10b981' }} />
-                          </Box>
-                          <Typography variant="h5" sx={{ mb: 2, fontWeight: 700, color: '#0F172A' }}>
-                            No Orders Yet
-                          </Typography>
-                          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 400, mx: 'auto', lineHeight: 1.6, mb: 3 }}>
-                            Start shopping to see your order history and track your purchases here. Get groceries delivered in 12 minutes! ⚡
-                          </Typography>
-                          <Button
-                            variant="contained"
-                            onClick={() => window.location.href = '/'}
-                            sx={{
-                              background: 'linear-gradient(135deg, #10b981, #059669)',
-                              borderRadius: 3,
-                              px: 4,
-                              py: 1.5,
-                              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                              textTransform: 'none',
-                              fontWeight: 600,
-                              '&:hover': {
-                                background: 'linear-gradient(135deg, #059669, #047857)',
-                                boxShadow: '0 6px 16px rgba(16, 185, 129, 0.4)',
-                                transform: 'translateY(-2px)'
-                              }
-                            }}
-                          >
-                            Start Shopping
-                          </Button>
-                        </Box>
-                      )}
-                    </Box>
-                  )}
                 </Box>
               </CardContent>
             </Card>

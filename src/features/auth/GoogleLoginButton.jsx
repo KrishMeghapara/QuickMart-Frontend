@@ -8,7 +8,6 @@ const GoogleLoginButton = ({ onLogin, disabled = false }) => {
   const googleLogin = useGoogleLogin({
     onSuccess: async (response) => {
       try {
-        console.log('Google response:', response);
         
         // Get the access token from Google
         const accessToken = response.access_token;

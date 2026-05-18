@@ -27,7 +27,7 @@ import {
   MyLocation as MyLocationIcon
 } from '@mui/icons-material';
 import { useAuth } from '../auth/AuthContext';
-import { API_BASE } from '../../config/api';
+import apiService from '../../services/apiService';
 import AddressMap from './AddressMap';
 
 const DEFAULT_CENTER = { lat: 28.6139, lng: 77.2090 };
@@ -158,7 +158,6 @@ const AddAddressForm = ({ onSuccess }) => {
     setError('');
     try {
       const query = encodeURIComponent(`${city}, ${state}, India`);
-      console.log('Geocoding query:', query);
       const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`);
       const data = await response.json();
       if (data && data[0]) {
@@ -233,23 +232,10 @@ const AddAddressForm = ({ onSuccess }) => {
     setError('');
 
     try {
-      const response = await fetch(`${API_BASE}/Address/AddForCurrentUser`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ house, street, landmark, city, state, pincode, phone, lat, lng })
-      });
-
-      if (response.ok) {
-        onSuccess && onSuccess();
-      } else {
-        const data = await response.json();
-        setError(typeof data === 'string' ? data : data?.message || 'Failed to add address');
-      }
+      await apiService.addAddressForCurrentUser({ house, street, landmark, city, state, pincode, phone, lat, lng });
+      onSuccess && onSuccess();
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError(err.message || 'Failed to add address');
     } finally {
       setLoading(false);
     }
@@ -265,7 +251,7 @@ const AddAddressForm = ({ onSuccess }) => {
             </Typography>
 
             <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   fullWidth
                   label="House/Flat/Building *"
@@ -284,7 +270,7 @@ const AddAddressForm = ({ onSuccess }) => {
                 />
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   fullWidth
                   label="Street/Area/Locality *"
@@ -303,7 +289,7 @@ const AddAddressForm = ({ onSuccess }) => {
                 />
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   fullWidth
                   label="Landmark (Optional)"
@@ -313,7 +299,7 @@ const AddAddressForm = ({ onSuccess }) => {
                 />
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   fullWidth
                   label="City *"
@@ -325,7 +311,7 @@ const AddAddressForm = ({ onSuccess }) => {
                 />
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   fullWidth
                   label="State *"
@@ -337,7 +323,7 @@ const AddAddressForm = ({ onSuccess }) => {
                 />
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   fullWidth
                   label="Pincode *"
@@ -350,7 +336,7 @@ const AddAddressForm = ({ onSuccess }) => {
                 />
               </Grid>
 
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <TextField
                   fullWidth
                   label="Phone Number (Optional)"
@@ -432,34 +418,34 @@ const AddAddressForm = ({ onSuccess }) => {
             <Card variant="outlined" sx={{ mb: 3 }}>
               <CardContent>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" color="text.secondary">House/Building</Typography>
                     <Typography variant="body1" fontWeight={600}>{house}</Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" color="text.secondary">Street/Area</Typography>
                     <Typography variant="body1" fontWeight={600}>{street}</Typography>
                   </Grid>
                   {landmark && (
-                    <Grid item xs={12} md={6}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                       <Typography variant="body2" color="text.secondary">Landmark</Typography>
                       <Typography variant="body1" fontWeight={600}>{landmark}</Typography>
                     </Grid>
                   )}
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" color="text.secondary">City</Typography>
                     <Typography variant="body1" fontWeight={600}>{city}</Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" color="text.secondary">State</Typography>
                     <Typography variant="body1" fontWeight={600}>{state}</Typography>
                   </Grid>
-                  <Grid item xs={12} md={6}>
+                  <Grid size={{ xs: 12, md: 6 }}>
                     <Typography variant="body2" color="text.secondary">Pincode</Typography>
                     <Typography variant="body1" fontWeight={600}>{pincode}</Typography>
                   </Grid>
                   {phone && (
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                       <Typography variant="body2" color="text.secondary">Phone</Typography>
                       <Typography variant="body1" fontWeight={600}>{phone}</Typography>
                     </Grid>

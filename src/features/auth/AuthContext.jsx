@@ -42,7 +42,6 @@ export const AuthProvider = ({ children }) => {
       const currentTime = Date.now() / 1000;
 
       if (payload.exp && payload.exp < currentTime) {
-        console.log('Token expired');
         return false;
       }
 
@@ -178,8 +177,7 @@ export const AuthProvider = ({ children }) => {
         const refreshTime = Math.max(timeUntilExpiration - 5 * 60 * 1000, 0);
 
         setTimeout(() => {
-          console.log('Token will expire soon, consider refreshing');
-          // Implement token refresh logic here
+          // Token nearing expiry — could trigger a refresh here
         }, refreshTime);
       }
     } catch (error) {

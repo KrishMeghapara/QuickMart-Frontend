@@ -123,7 +123,7 @@ export default function ProductDetailPage() {
 
         <Grid container spacing={4}>
           {/* Product Image */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Paper sx={{ p: 3, borderRadius: 3, textAlign: 'center' }}>
               {product.productImg && product.productImg !== 'false' ? (
                 <img
@@ -154,7 +154,7 @@ export default function ProductDetailPage() {
           </Grid>
 
           {/* Product Details */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Box sx={{ pl: { md: 2 } }}>
               {/* Product Name & Category */}
               <Typography variant="h4" sx={{ fontWeight: 600, mb: 1, color: '#111827' }}>

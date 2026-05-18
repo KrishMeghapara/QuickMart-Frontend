@@ -12,9 +12,6 @@ import {
   IconButton
 } from '@mui/material';
 import {
-  AccessTime as ClockIcon,
-  TrendingUp as TrendingIcon,
-  LocalOffer as OfferIcon,
   FlashOn as FlashIcon,
   FilterList as FilterIcon,
   Sort as SortIcon,
@@ -39,29 +36,10 @@ export default function SmartSearchResults({
   ];
 
   const filterOptions = [
-    { value: 'all', label: 'All Items', count: results.length },
-    { value: 'under_10_mins', label: 'Under 10 mins', count: Math.floor(results.length * 0.3) },
-    { value: 'under_15_mins', label: 'Under 15 mins', count: Math.floor(results.length * 0.7) },
-    { value: 'offers', label: 'On Offer', count: Math.floor(results.length * 0.2) }
+    { value: 'all', label: 'All Items', count: results.length }
   ];
 
-  const getDeliveryTime = (product) => {
-    // Generate consistent delivery time based on product ID
-    const seed = product.productID || 1;
-    return ((seed * 7) % 10) + 8; // 8-18 mins, consistent per product
-  };
 
-  const hasOffer = (product) => {
-    // Generate consistent offer status based on product ID
-    const seed = product.productID || 1;
-    return (seed * 17) % 10 < 2; // 20% chance, consistent per product
-  };
-
-  const isPopular = (product) => {
-    // Generate consistent popularity based on product ID
-    const seed = product.productID || 1;
-    return (seed * 11) % 10 < 3; // 30% chance, consistent per product
-  };
 
   if (loading) {
     return (
@@ -71,7 +49,7 @@ export default function SmartSearchResults({
         </Typography>
         <Grid container spacing={2}>
           {[...Array(8)].map((_, index) => (
-            <Grid item xs={6} sm={4} md={3} key={index}>
+            <Grid size={{ xs: 6, sm: 4, md: 3 }} key={index}>
               <Card sx={{ borderRadius: 2 }}>
                 <Box sx={{ 
                   height: 120,
@@ -211,12 +189,8 @@ export default function SmartSearchResults({
       {/* Results Grid */}
       <Grid container spacing={3}>
         {results.map((product, index) => {
-          const deliveryTime = getDeliveryTime(product);
-          const productHasOffer = hasOffer(product);
-          const productIsPopular = isPopular(product);
-
           return (
-            <Grid item xs={6} sm={4} md={3} key={product.productID || index}>
+            <Grid size={{ xs: 6, sm: 4, md: 3 }} key={product.productID || index}>
               <Fade in={true} timeout={200 + index * 50}>
                 <Card sx={{
                   border: '1px solid #e5e7eb',
@@ -230,53 +204,21 @@ export default function SmartSearchResults({
                     borderColor: '#10b981'
                   }
                 }}>
-                  {/* Badges */}
-                  <Box sx={{ position: 'absolute', top: 8, left: 8, zIndex: 1 }}>
-                    <Chip
-                      icon={<ClockIcon sx={{ fontSize: 12 }} />}
-                      label={`${deliveryTime} mins`}
-                      size="small"
-                      sx={{
-                        bgcolor: deliveryTime <= 10 ? '#10b981' : deliveryTime <= 15 ? '#f59e0b' : '#6b7280',
-                        color: 'white',
-                        fontWeight: 600,
-                        fontSize: '0.7rem',
-                        mb: 0.5
-                      }}
-                    />
-                  </Box>
-
-                  <Box sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}>
-                    {productIsPopular && (
+                  {/* Low Stock Badge — uses real API data */}
+                  {product.stockQuantity != null && product.stockQuantity > 0 && product.stockQuantity <= 5 && (
+                    <Box sx={{ position: 'absolute', top: 8, left: 8, zIndex: 1 }}>
                       <Chip
-                        icon={<TrendingIcon sx={{ fontSize: 10 }} />}
-                        label="Popular"
-                        size="small"
-                        sx={{
-                          bgcolor: '#ef4444',
-                          color: 'white',
-                          fontWeight: 600,
-                          fontSize: '0.65rem',
-                          height: '18px',
-                          mb: 0.5
-                        }}
-                      />
-                    )}
-                    {productHasOffer && (
-                      <Chip
-                        icon={<OfferIcon sx={{ fontSize: 10 }} />}
-                        label="20% OFF"
+                        label={`Only ${product.stockQuantity} left`}
                         size="small"
                         sx={{
                           bgcolor: '#f59e0b',
                           color: 'white',
                           fontWeight: 600,
-                          fontSize: '0.65rem',
-                          height: '18px'
+                          fontSize: '0.7rem'
                         }}
                       />
-                    )}
-                  </Box>
+                    </Box>
+                  )}
 
                   {/* Product Image */}
                   <Box sx={{ 
@@ -309,15 +251,6 @@ export default function SmartSearchResults({
                       }}>
                         ₹{product.productPrice || 99}
                       </Typography>
-                      {productHasOffer && (
-                        <Typography sx={{ 
-                          color: '#9ca3af',
-                          fontSize: '0.8rem',
-                          textDecoration: 'line-through'
-                        }}>
-                          ₹{Math.round((product.productPrice || 99) * 1.25)}
-                        </Typography>
-                      )}
                     </Box>
 
                     <Button

@@ -18,6 +18,7 @@ import {
   Avatar,
   Chip
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import apiService from '../../services/apiService';
 import GoogleLoginButton from './GoogleLoginButton';
 import { 
@@ -44,6 +45,7 @@ const LoginForm = ({ onLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const navigate = useNavigate();
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -123,7 +125,7 @@ const LoginForm = ({ onLogin }) => {
     <Container maxWidth="lg">
       <Grid container spacing={4} alignItems="center">
         {/* Left Side - Quick Commerce Brand */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Fade in={true} timeout={800}>
             <Box sx={{ textAlign: { xs: 'center', md: 'left' }, mb: { xs: 4, md: 0 } }}>
               {/* Brand Section */}
@@ -191,7 +193,7 @@ const LoginForm = ({ onLogin }) => {
         </Grid>
 
         {/* Right Side - Login Form */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Fade in={true} timeout={1000}>
             <Card sx={{ 
               maxWidth: 480, 
@@ -336,7 +338,7 @@ const LoginForm = ({ onLogin }) => {
                     Don't have an account?{' '}
                     <Button 
                       variant="text" 
-                      onClick={() => window.location.href = '/register'}
+                      onClick={() => navigate('/register')}
                       sx={{ 
                         color: '#10b981',
                         fontWeight: 600,

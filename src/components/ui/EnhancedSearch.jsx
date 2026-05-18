@@ -82,8 +82,6 @@ export default function EnhancedSearch({ onSearch, categories = [] }) {
   const handleSearch = (searchQuery) => {
     if (!searchQuery.trim()) return;
     
-    console.log('EnhancedSearch: Searching for:', searchQuery);
-    
     // Add to recent searches
     const updated = [searchQuery, ...recentSearches.filter(s => s !== searchQuery)].slice(0, 5);
     setRecentSearches(updated);

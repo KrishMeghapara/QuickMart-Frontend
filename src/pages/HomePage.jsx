@@ -45,13 +45,11 @@ export default function HomePage({ searchQuery, searchResults, onFilterApply }) 
 
   const handleFilterApply = async (filters) => {
     try {
-      console.log('HomePage: Applying filters:', filters);
       const products = await apiService.filterProducts(filters);
-      console.log('HomePage: Filtered products:', products);
       setFilteredProducts(products);
       setShowFilters(true);
     } catch (error) {
-      console.error('Filter failed:', error);
+      // Filter failed
     }
   };
 
@@ -77,28 +75,22 @@ export default function HomePage({ searchQuery, searchResults, onFilterApply }) 
     const loadData = async () => {
       try {
         setError(null);
-        console.log('Loading categories...');
         const loadedCategories = await withCache(apiService.getCategories.bind(apiService), 'categories')();
-        console.log('Categories loaded:', loadedCategories);
         setLocalCategories(loadedCategories);
 
         const prods = {};
         await Promise.all(
           loadedCategories.map(async cat => {
             try {
-              console.log(`Loading products for category ${cat.categoryID}...`);
               const products = await withCache(apiService.getProductsByCategory.bind(apiService), 'products', 2 * 60 * 1000)(cat.categoryID);
-              console.log(`Products for category ${cat.categoryID}:`, products);
               prods[cat.categoryID] = products;
             } catch (error) {
-              console.error(`Failed to load products for category ${cat.categoryID}:`, error);
               prods[cat.categoryID] = [];
             }
           })
         );
         setCategoryProducts(prods);
       } catch (error) {
-        console.error('Failed to load categories:', error);
         setError(error.message || 'Failed to load data');
       } finally {
         setLoading(false);

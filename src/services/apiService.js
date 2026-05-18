@@ -45,10 +45,8 @@ class ApiService {
 
         // Handle 401 Unauthorized - token expired or invalid
         if (response.status === 401) {
-          console.log('Token expired or invalid. Clearing auth...');
           localStorage.removeItem('jwtToken');
           localStorage.removeItem('user');
-          // Only redirect if not already on login page
           if (!window.location.pathname.includes('/login')) {
             window.location.href = '/login';
           }
@@ -57,10 +55,6 @@ class ApiService {
 
         // Handle 500 server errors
         if (response.status === 500) {
-          console.error('Server error:', errorData.message || responseText);
-          if (errorData.inner) {
-            console.error('Inner exception:', errorData.inner);
-          }
           throw new Error(errorData.message || 'Server error. Please try again later.');
         }
 
@@ -86,26 +80,6 @@ class ApiService {
       }
       throw error;
     }
-  }
-
-  // Test endpoint
-  async testConnection() {
-    return this.request('/Test');
-  }
-
-  async healthCheck() {
-    return this.request('/Test/health');
-  }
-
-  async testDatabase() {
-    return this.request('/Test/db-test');
-  }
-
-  async testRegister(userData) {
-    return this.request('/Test/test-register', {
-      method: 'POST',
-      body: JSON.stringify(userData)
-    });
   }
 
   // Auth endpoints
@@ -202,6 +176,24 @@ class ApiService {
   }
 
   // Address endpoints
+  async getMyAddress() {
+    return this.request('/Address/GetForCurrentUser');
+  }
+
+  async addAddressForCurrentUser(addressData) {
+    return this.request('/Address/AddForCurrentUser', {
+      method: 'POST',
+      body: JSON.stringify(addressData)
+    });
+  }
+
+  async updateMyAddress(addressData) {
+    return this.request('/Address/UpdateForCurrentUser', {
+      method: 'PUT',
+      body: JSON.stringify(addressData)
+    });
+  }
+
   async addAddress(addressData) {
     return this.request('/Address', {
       method: 'POST',

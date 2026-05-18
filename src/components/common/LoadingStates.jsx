@@ -4,7 +4,7 @@ import { Box, Card, CardContent, Skeleton, Grid, Typography } from '@mui/materia
 export const ProductCardSkeleton = ({ count = 8 }) => (
   <Grid container spacing={3}>
     {[...Array(count)].map((_, index) => (
-      <Grid item xs={6} sm={4} md={3} key={index}>
+      <Grid size={{ xs: 6, sm: 4, md: 3 }} key={index}>
         <Card sx={{ borderRadius: 3 }}>
           <Skeleton variant="rectangular" height={200} />
           <CardContent>
